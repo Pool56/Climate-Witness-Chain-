@@ -25,7 +25,7 @@ _New to Git and GitHub? This free online course will get you up to speed quickly
 
 
 ## Project summary
-Our project focuses on aiding people who are affected by climate change such as asthmatic people. We are creating learning materials in the form of powerpoints for either doctors, pharmacists or climate scientists who are not conversant to IBM technologies such as Watsonx.ai, Watsonx. Assistant and Watsonx. Orchestate. The information is derived from courses in the IBM SkillsBuild.
+Our project focuses on aiding people who are affected by climate change such as asthmatic people. The project involves use of data from IBM's ESG applications such as the Environmental Intelligence Suite so as to enable doctors and pharmacists to make informed decisions about the how their medications would perform in hostile climates such as regions with high temperature. We are creating learning materials in the form of powerpoints for either doctors, pharmacists or climate scientists such as water engineers  who are not conversant to IBM technologies such as Watsonx.ai, Watsonx. Assistant and Watsonx. Orchestate. The information is derived from courses in the IBM SkillsBuild.
 
 ### The issue we are hoping to solve
 The problem  being addressed is people with medical conditions such as asthma are severely impacted by climate change specifically regarding elevated  temperature and high amounts of carbon emission. Their are medications which have been designed to treat various conditions however, some medications do not work effectively due to hostile climatic conditions. 
@@ -35,7 +35,7 @@ Additionally climate scientists, doctors or even pharmasists may not know how to
 The solution could help by gathering real time data so as to aid reseachers such as; doctors and pharmacists to make appropriate decisions with regard to designing medical products or prescribing them.
 
 ### Our idea
-The idea is creation of an assistant that is able to answer query with regard to health sciences and climatic patterns.
+The idea is creation of an assistant that is able to answer queries with regard to health sciences and climatic patterns.
 The future prospects are to have the application placed on hospitals for monitoring status of patients with respiratory conditions.
 Test the application performance on pharmaceutical firms so that they could assess the performance of the medications while taking into account environmental factors.
 Lastly, the application could be integrated to other softwares that climate scientists have  such as water engineers with regard to prediction of water shortage.
@@ -47,20 +47,18 @@ The application utilises various IBM technology such as Watsonx Assistant, Watso
 The models (IBM technologies) are integrated into the solution by determining the relation of climatic factors such as temperature to medical conditions such as asthma.
 
 Business value.
-The value is based on reduction of time for  doctors
-who have a difficulty recommending what prescription to give their patients while taking into account environmental factors.
+The value is based on reduction of time for  doctors who have a difficulty recommending what prescription to give their patients while taking into account environmental factors.
 
 Originality
 The uniqueness is integration of services from Watsonx with IBM's ESG software such as Environmental Intelligence Suite as well as use of  the Cognos analytics
 Another creative aspect is designing detailed text files and pdf documents from IBM SkillsBuild which enables users to understand the functionality of IBM software such as Watsonx. Assistant.
 
-More detail is available in our [description document](./docs/DESCRIPTION.md).
+
 
 ## Technology implementation
 
 ### IBM watsonx product(s) used
 
-_INSTRUCTIONS: Included here is a list of IBM watsonx products. Remove any products you did not use. Leave only those included in your solution code. In your official submission on the Call for Code Global Challenge web site, you are required to provide details on where and how you used each IBM watsonx product so judges can review your implementation. Remove these instructions._
 
 **Featured watsonx products**
 
@@ -80,32 +78,25 @@ IBM Environmental Intelligence Suite was used to examine geospatial, weather and
 
 ### Solution architecture
 
+https://drive.google.com/file/d/1JsJ-bcJ0orc3tGhCamHhY7hLxsLNB6qO/view?usp=sharing
 
-1. The user navigates to the site and uploads a video file.
-2. Watson Speech to Text processes the audio and extracts the text.
-3. Watson Translation (optionally) can translate the text to the desired language.
-4. The app stores the translated text as a document within Object Storage.
 
 ## Presentation materials
+https://drive.google.com/file/d/1RiL9FMIS3mA6I72MeWCxpFXv8wNbjEmQ/view?usp=sharing
+https://docs.google.com/presentation/d/1Xs3AKxCscrrhaqryBUUjURqo7u2NOeoj/edit?usp=sharing&ouid=101103218955394927682&rtpof=true&sd=true
 
-_INSTRUCTIONS: The following deliverables should be officially posted to your My Team > Submissions section of the [Call for Code Global Challenge resources site](https://cfc-prod.skillsnetwork.site/), but you can also include them here for completeness. Replace the examples seen here with your own deliverable links._
+
+### Videos for illustration
+https://drive.google.com/file/d/1lzE4GqZsqL4yO-tJ8PLckCjU0nr6nzgw/view?usp=sharing
+https://drive.google.com/file/d/1rfrrF_lSHwdAkY3ZEH2j6CQQ_exWrGDR/view?usp=sharing
+
+
 
 ### Solution demo video
 https://youtu.be/3dYIc0G45AQ
 https://youtu.be/2W3sXYQsoeg
 https://youtu.be/3xDdCV8n8a4
 https://youtu.be/TePBeQ-oMoI
-
-
-
-
-## Additional details
-
-_INSTRUCTIONS: The following deliverables are suggested, but **optional**. Additional details like this can help the judges better review your solution. Remove any sections you are not using._
-
-### How to run the project
-
-INSTRUCTIONS: In this section you add the instructions to run your project on your local machine for development and testing purposes. You can also add instructions on how to deploy the project in production.
 
 ### Live demo
 
@@ -141,6 +132,4 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 This project is licensed under the Apache 2 License - see the [LICENSE](LICENSE) file for details.
 
-### Acknowledgments
 
-- Based on [Billie Thompson's README template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2).
