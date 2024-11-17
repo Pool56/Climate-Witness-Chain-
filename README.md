@@ -25,19 +25,34 @@ _New to Git and GitHub? This free online course will get you up to speed quickly
 
 
 ## Project summary
-Our project focuses on aiding people who are affected byclimate change such as asthmatic people. We are creating learning materials in the form of powerpoints for either doctors, pharmacists or climate scientists who are not conversant to IBM technologies such as Watsonx.ai, Watsonx. Assistant and Watsonx. Orchestate. The information is derived from courses in the IBM SkillsBuild.
+Our project focuses on aiding people who are affected by climate change such as asthmatic people. We are creating learning materials in the form of powerpoints for either doctors, pharmacists or climate scientists who are not conversant to IBM technologies such as Watsonx.ai, Watsonx. Assistant and Watsonx. Orchestate. The information is derived from courses in the IBM SkillsBuild.
 
 ### The issue we are hoping to solve
-
-REPLACE THIS SENTENCE with a short description, 2-3 sentences in length, of the specific sustainability problem your solution is meant to address.
-
+The problem  being addressed is people with medical conditions such as asthma are severely impacted by climate change specifically regarding elevated  temperature and high amounts of carbon emission. Their are medications which have been designed to treat various conditions however, some medications do not work effectively due to hostile climatic conditions. 
+Additionally climate scientists, doctors or even pharmasists may not know how to use technology so as to assess environmental factors by use of technology.
 ### How our technology solution can help
 
-REPLACE THIS SENTENCE with a short description of your team's solution, in about 10 words.
+The solution could help by gathering real time data so as to aid reseachers such as; doctors and pharmacists to make appropriate decisions with regard to designing medical products or prescribing them.
 
 ### Our idea
+The idea is creation of an assistant that is able to answer query with regard to health sciences and climatic patterns.
+The future prospects are to have the application placed on hospitals for monitoring status of patients with respiratory conditions.
+Test the application performance on pharmaceutical firms so that they could assess the performance of the medications while taking into account environmental factors.
+Lastly, the application could be integrated to other softwares that climate scientists have  such as water engineers with regard to prediction of water shortage.
 
-INSTRUCTIONS: Replace this paragraph with a longer description of your solution. In about 500 words, describe your solution in more detail. Include the real-world problem you identified, describe the technological solution you have created, and explain how it’s an improvement over existing solutions. You can supply additional documentation in this source code repository that you link to as well.
+### Success criteria
+
+Application of technology
+The application utilises various IBM technology such as Watsonx Assistant, Watsonx.ai, Cognos analysis, Watsonx Orchestrate and Watsonx.governance. The application also utilises IBM content from courses in the IBM SkillsBuild.
+The models (IBM technologies) are integrated into the solution by determining the relation of climatic factors such as temperature to medical conditions such as asthma.
+
+Business value.
+The value is based on reduction of time for  doctors
+who have a difficulty recommending what prescription to give their patients while taking into account environmental factors.
+
+Originality
+The uniqueness is integration of services from Watsonx with IBM's ESG software such as Environmental Intelligence Suite as well as use of  the Cognos analytics
+Another creative aspect is designing detailed text files and pdf documents from IBM SkillsBuild which enables users to understand the functionality of IBM software such as Watsonx. Assistant.
 
 More detail is available in our [description document](./docs/DESCRIPTION.md).
 
@@ -76,20 +91,11 @@ IBM Environmental Intelligence Suite was used to examine geospatial, weather and
 _INSTRUCTIONS: The following deliverables should be officially posted to your My Team > Submissions section of the [Call for Code Global Challenge resources site](https://cfc-prod.skillsnetwork.site/), but you can also include them here for completeness. Replace the examples seen here with your own deliverable links._
 
 ### Solution demo video
+https://youtu.be/3dYIc0G45AQ
+https://youtu.be/2W3sXYQsoeg
+https://youtu.be/3xDdCV8n8a4
+https://youtu.be/TePBeQ-oMoI
 
-
-
-### Project development roadmap
-
-The project currently does the following things.
-
-- Feature 1
-- Feature 2
-- Feature 3
-
-In the future we plan to...
-
-See below for our proposed schedule on next steps after Call for Code 2024 submission.
 
 
 
@@ -104,6 +110,9 @@ INSTRUCTIONS: In this section you add the instructions to run your project on yo
 ### Live demo
 
 You can find a running system to test at...
+https://dataplatform.cloud.ibm.com/analytics/notebooks/v2/1440e130-3601-4271-88bb-8750995b13a8/view?access_token=199b2cc4131874a8424eaf9e4815372e139e7ab3765d5bc849b862f11a54dba0&context=wx
+
+https://dataplatform.cloud.ibm.com/analytics/notebooks/v2/ade274f2-6129-4bde-b587-621f76afa0ed/view?access_token=fb058ffff3374e5d50eeecdf328f2f48a52009d608057fe6e85e5c8edf8f4c5c&context=wx
 
 
 
