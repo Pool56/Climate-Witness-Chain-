@@ -28,8 +28,8 @@ _New to Git and GitHub? This free online course will get you up to speed quickly
 Our project focuses on aiding people who are affected by climate change such as asthmatic people. The project involves use of data from IBM's ESG applications such as the Environmental Intelligence Suite so as to enable doctors and pharmacists to make informed decisions about the how their medications would perform in hostile climates such as regions with high temperature. We are creating learning materials in the form of powerpoints for either doctors, pharmacists or climate scientists such as water engineers  who are not conversant to IBM technologies such as Watsonx.ai, Watsonx. Assistant and Watsonx. Orchestate. The information is derived from courses in the IBM SkillsBuild.
 
 ### The issue we are hoping to solve
-The problem  being addressed is people with medical conditions such as asthma are severely impacted by climate change specifically regarding elevated  temperature and high amounts of carbon emission. Their are medications which have been designed to treat various conditions however, some medications do not work effectively due to hostile climatic conditions. 
-Additionally climate scientists, doctors or even pharmasists may not know how to use technology so as to assess environmental factors by use of technology.
+The problem  being addressed is people with medical conditions such as asthma are severely impacted by climate change specifically regarding elevated  temperature and high amounts of carbon emission. There are medications which have been designed to treat various conditions however, some medications do not work effectively due to hostile climatic conditions. 
+Additionally climate scientists, doctors or even pharmacists may not know how to use technology so as to assess environmental factors by use of technology.
 ### How our technology solution can help
 
 The solution could help by gathering real time data so as to aid reseachers such as; doctors and pharmacists to make appropriate decisions with regard to designing medical products or prescribing them.
