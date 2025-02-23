@@ -25,17 +25,17 @@ _New to Git and GitHub? This free online course will get you up to speed quickly
 
 
 ## Project summary
-Our project focuses on aiding people who are affected by climate change such as asthmatic people. The project involves use of data from IBM's ESG applications such as the Environmental Intelligence Suite so as to enable doctors and pharmacists to make informed decisions about the how their medications would perform in hostile climates such as regions with high temperature. We are creating learning materials in the form of powerpoints for either doctors, pharmacists or climate scientists such as water engineers  who are not conversant to IBM technologies such as Watsonx.ai, Watsonx. Assistant and Watsonx. Orchestate. The information is derived from courses in the IBM SkillsBuild.
+Our project focuses on mitigating effects of climate change by use of IBM technologies such as Watsonx and Cognos analytics. The sectors we are targeting are health and climate while the beneficiaries of our solution are climate scientists, doctors, pharmacists and people with medical conditions such as those who are asthmatic.  The solution first starts with collection of information about IBM granite models, climate data and health details of people. The second step is establishing a relation health and climate by using the structure mode of watsonx.ai. Then the generated text and code by from Watsonx.ai is analysed by Watsonx.governance while using Granite guardian 3.1 8B, the purpose is to determine presence of hallucinations. Afterwards, the generated text is placed into a text file which is then uploaded to the chat mode of watsonx.ai, the text file is used to ground responses. The text file has  medical descriptions illustrating features of Granite models. The purpose is to create an intelligent assistant which provides customised responses based on the profession of a person such as a doctor or a climate scientist.  Additionally, the project involves use of data from IBM's ESG applications such as the Environmental Intelligence Suite so as to enable doctors and pharmacists to make informed decisions about the how their medications would perform in hostile climates such as regions with high temperature. We are creating learning materials in the form of powerpoints for either doctors, pharmacists or climate scientists such as water engineers  who are not conversant to IBM technologies such as Watsonx.ai, Watsonx. Assistant and Watsonx. Orchestate. The information is derived from courses in the IBM SkillsBuild. We are using granite models such as Granite 13 billion  ModelInstruct for summarization and  generation of text for the learning materials.
 
 ### The issue we are hoping to solve
 The problem  being addressed is people with medical conditions such as asthma are severely impacted by climate change specifically regarding elevated  temperature and high amounts of carbon emission. There are medications which have been designed to treat various conditions however, some medications do not work effectively due to hostile climatic conditions. 
-Additionally climate scientists, doctors or even pharmacists may not know how to use technology so as to assess environmental factors by use of technology.
+Additionally climate scientists, doctors or even pharmacists may not know how to use IBM  technology so as to assess environmental factors.
 ### How our technology solution can help
 
-The solution could help by gathering real time data so as to aid reseachers such as; doctors and pharmacists to make appropriate decisions with regard to designing medical products or prescribing them.
+The solution could help by gathering real time data so as to aid reseachers such as; doctors and pharmacists to make appropriate decisions with regard to designing medical products, accurately analysing weather patterns, creation of code that relates to medical prescription and providing explanation to code.
 
 ### Our idea
-The idea is creation of an assistant that is able to answer queries with regard to health sciences and climatic patterns.
+The idea is creation of an Intelligent  assistant that is able to answer queries with regard to health sciences and climatic patterns.
 The future prospects are to have the application placed on hospitals for monitoring status of patients with respiratory conditions.
 Test the application performance on pharmaceutical firms so that they could assess the performance of the medications while taking into account environmental factors.
 Lastly, the application could be integrated to other softwares that climate scientists have  such as water engineers with regard to prediction of water shortage.
@@ -51,7 +51,7 @@ The value is based on reduction of time for  doctors who have a difficulty recom
 
 Originality
 The uniqueness is integration of services from Watsonx with IBM's ESG software such as Environmental Intelligence Suite as well as use of  the Cognos analytics
-Another creative aspect is designing detailed text files and pdf documents from IBM SkillsBuild which enables users to understand the functionality of IBM software such as Watsonx. Assistant.
+Another creative aspect is designing detailed text files and pdf documents from IBM SkillsBuild which enables users to understand the functionality of IBM software such as Watsonx.ai.
 
 
 
@@ -63,47 +63,23 @@ Another creative aspect is designing detailed text files and pdf documents from 
 **Featured watsonx products**
 
 - [watsonx.ai](https://www.ibm.com/products/watsonx-ai) - WHERE AND HOW THIS IS USED IN OUR SOLUTION
-- The Watsonx.ai was integrated with the Watsonx.Assistant so as to provide answers which are detailed for easier understanding.
-- The watsonx.ai was used for generation of new text from information obtained from the IBM SkillsBuild.
-- The watsonx.ai was also used in for prediction of weather patterns such as daily precipitation and providing recommendations on what action should be taken. Extreme climatic conditions affect certain people especially those who are asthmatic.
-
+- The watsonx.ai (structure mode)  is used for generation of text by use of Granite 3.1-8b-Instruct
+- The watsonx.ai (structure mode)  is used to translate technical English terms to French by use of Granite 20B Multilingual Model
+- The watsonx.ai (structure mode) is used for generation of code by use  of Granite-20B-code-instruct
+- The watsonx.ai (structure mode) is used to explain code by use of Granite-34b-code-instruct  
+- The watsonx.ai (structure mode) is used for generation of new text from information obtained from the IBM SkillsBuild, by use of Granite 3.1-2B-instruct
+- The watsonx.ai ( chat mode) is used for generation of text by use of granite 3-8-b-instruct
 - [watsonx.governance](https://www.ibm.com/products/watsonx-governance) - WHERE AND HOW THIS IS USED IN OUR SOLUTION
-- The watsonx.governance was used to detect levels or presence of copyright infringement from the generated content extracted from IBM SkillsBuild as well as information obtained from webinars and the IBM website.
+- The watsonx.governance was used to detect levels or presence of hallucinations of codes being  created as well as providing solutions,by use of Granite Guardian 3.1 8B
 
-- [watsonx Assistant](https://cloud.ibm.com/catalog/services/watsonx-assistant) - WHERE AND HOW THIS IS USED IN OUR SOLUTION
-- Watsonx assistant was integrated with watsonx.ai so as to provide a simple way to perform an integration between a dialog flow and generative AI inferencing services in watsonx.ai.
 
 ### Other IBM technology used
 IBM Environmental Intelligence Suite was used to examine geospatial, weather and climate data which are main factors that water engineers take into account when drilling boreholes. Cognos Analytics was used so as to formulate AI-powered responses and insights from factors that could affect water access such as examining scope emission report from IBM Envizi so as determine possible level of carbon contamination of water.This insights could be used for making data-driven decisions
 
-### Solution architecture
 
-https://drive.google.com/file/d/1JsJ-bcJ0orc3tGhCamHhY7hLxsLNB6qO/view?usp=sharing
-
-
-## Presentation materials
-https://drive.google.com/file/d/1RiL9FMIS3mA6I72MeWCxpFXv8wNbjEmQ/view?usp=sharing
-https://docs.google.com/presentation/d/1Xs3AKxCscrrhaqryBUUjURqo7u2NOeoj/edit?usp=sharing&ouid=101103218955394927682&rtpof=true&sd=true
-
-
-### Videos for illustration
-https://drive.google.com/file/d/1lzE4GqZsqL4yO-tJ8PLckCjU0nr6nzgw/view?usp=sharing
-https://drive.google.com/file/d/1rfrrF_lSHwdAkY3ZEH2j6CQQ_exWrGDR/view?usp=sharing
-
-
-
-### Solution demo video
-https://youtu.be/3dYIc0G45AQ
-https://youtu.be/2W3sXYQsoeg
-https://youtu.be/3xDdCV8n8a4
-https://youtu.be/TePBeQ-oMoI
-
-### Live demo
 
 You can find a running system to test at...
-https://dataplatform.cloud.ibm.com/analytics/notebooks/v2/1440e130-3601-4271-88bb-8750995b13a8/view?access_token=199b2cc4131874a8424eaf9e4815372e139e7ab3765d5bc849b862f11a54dba0&context=wx
 
-https://dataplatform.cloud.ibm.com/analytics/notebooks/v2/ade274f2-6129-4bde-b587-621f76afa0ed/view?access_token=fb058ffff3374e5d50eeecdf328f2f48a52009d608057fe6e85e5c8edf8f4c5c&context=wx
 
 
 
