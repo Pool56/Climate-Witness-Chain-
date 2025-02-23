@@ -9,13 +9,7 @@ _New to Git and GitHub? This free online course will get you up to speed quickly
 - [Technology implementation](#technology-implementation)
   - [IBM watsonx product(s) used](#ibm-ai-services-used)
   - [Other IBM technology used](#other-ibm-technology-used)
-  - [Solution architecture](#solution-architecture)
-- [Presentation materials](#presentation-materials)
-  - [Solution demo video](#solution-demo-video)
-  - [Project development roadmap](#project-development-roadmap)
 - [Additional details](#additional-details)
-  - [How to run the project](#how-to-run-the-project)
-  - [Live demo](#live-demo)
 - [About this template](#about-this-template)
   - [Contributing](#contributing)
   - [Versioning](#versioning)
@@ -76,9 +70,15 @@ Another creative aspect is designing detailed text files and pdf documents from 
 ### Other IBM technology used
 IBM Environmental Intelligence Suite was used to examine geospatial, weather and climate data which are main factors that water engineers take into account when drilling boreholes. Cognos Analytics was used so as to formulate AI-powered responses and insights from factors that could affect water access such as examining scope emission report from IBM Envizi so as determine possible level of carbon contamination of water.This insights could be used for making data-driven decisions
 
+## Additional-details
+## Contents of Github
+In the Github section links for the notebooks made by use of the watsonx.ai
+In the docs section documents such as details of the foundation models of IBM Granite are placed, in an excel document.
+Additionally a text file has been placed describing features of IBM granite models from a medical point of view.
+An excel sheets highlighting contents of the Environmental Intelligence Suite has also been placed.
+There are powerpoint documents from courses in the IBM SkillsBuild whose texts have been rephrased by use of Granite models.
+The images section contains solution architectures of our project
 
-
-You can find a running system to test at...
 
 
 
