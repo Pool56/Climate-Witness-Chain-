@@ -452,7 +452,7 @@ print(answer)
 
 
 ## Contents of Github
-In the Github section links for the notebooks and python code of the use of watsonx.ai have been placed.
+In the Github section links for the python code of the use of watsonx.ai has been placed.
 In the docs section powerpoint of the presentation used in the video has been placed.
 An excel sheets highlighting contents of the Environmental Intelligence Suite has also been placed.
 
