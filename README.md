@@ -7,7 +7,7 @@ _New to Git and GitHub? This free online course will get you up to speed quickly
   - [How our technology solution can help](#how-our-technology-solution-can-help)
   - [Our idea](#our-idea)
 - [Technology implementation](#technology-implementation)
-- [Judging criteria](#https://compete.05hackathon.watsonx-challenge.ibm.com/competitions/may25#judging )
+- [Judging criteria](#judging-criteria)
   - [IBM watsonx product(s) used](#ibm-ai-services-used)
   - [Other IBM technology used](#other-ibm-technology-used)
 - [Github repository](#github-repository)
@@ -37,7 +37,7 @@ Lastly, the application could be integrated to other softwares that climate scie
 
 ## Technology implementation
 
-## Judging criteria
+## Judging criteria (https://compete.05hackathon.watsonx-challenge.ibm.com/competitions/may25#judging) 
 Feasibility:
 The solution is highly feasible given the maturity of the technologies used such as; Watsonx.ai, Elasticsearch, LangChain and  IBM Environmental Intelligence Suite. Each component is production-ready, well-documented, and widely supported.
 
