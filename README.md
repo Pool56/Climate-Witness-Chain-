@@ -332,13 +332,6 @@ An excel sheets highlighting contents of the Environmental Intelligence Suite ha
 There are powerpoint documents from courses in the IBM SkillsBuild whose texts have been rephrased by use of Granite models.
 The images section contains solution architectures of our project
 
-
-
-
-
----
-```text
-
 ## How  RAG and watsonx.ai was utilized in this solution
 Retrieval-Augmented Generation (RAG) is a hybrid approach that combines:
  Retrieval of relevant documents from a knowledge base (Elasticsearch)
