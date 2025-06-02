@@ -145,7 +145,7 @@ jupyter notebook notebooks/climate_rag_notebook.ipynb
 
 #  requirements.txt
 
-
+```text
 ibm-watsonx-ai>=1.0.312
 elasticsearch
 langchain
@@ -188,12 +188,19 @@ if __name__ == "__main__":
 
 #  scripts/create_index_and_embed.py
 import os
+
 import json
+
 import pandas as pd
+
 from elasticsearch import Elasticsearch
+
 from elasticsearch.helpers import bulk
+
 from sentence_transformers import SentenceTransformer
+
 from langchain.embeddings import SentenceTransformerEmbeddings
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -263,13 +270,21 @@ if __name__ == "__main__":
 
 # scripts/rag_pipeline.py
 import os
+
 from dotenv import load_dotenv
+
 from elasticsearch import Elasticsearch
+
 from langchain.embeddings import SentenceTransformerEmbeddings
+
 from langchain.vectorstores import ElasticVectorSearch
+
 from langchain.chains import RetrievalQA
+
 from langchain.llms import WatsonxAI
+
 from ibm_watsonx_ai import Credentials
+
 
 load_dotenv()
 
@@ -322,6 +337,7 @@ from scripts.rag_pipeline import answer_question
 question = "How does climate change increase the risk of floods in Nairobi?"
 answer = answer_question(question)
 print(answer)
+
 
 
 ## Contents of Github
