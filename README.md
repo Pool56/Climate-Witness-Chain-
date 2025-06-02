@@ -142,7 +142,6 @@ jupyter notebook notebooks/climate_rag_notebook.ipynb
 
 # License
 
----
 
 #  requirements.txt
 
@@ -338,8 +337,7 @@ The images section contains solution architectures of our project
 
 
 ---
-
-_INSTRUCTIONS: You can remove the below section from your specific project README._
+```text
 
 ## How  RAG and watsonx.ai was utilized in this solution
 Retrieval-Augmented Generation (RAG) is a hybrid approach that combines:
