@@ -453,32 +453,39 @@ print(answer)
 
 ## Contents of Github
 In the Github section links for the notebooks and python code of the use of watsonx.ai have been placed.
-
 In the docs section powerpoint of the presentation used in the video has been placed.
 An excel sheets highlighting contents of the Environmental Intelligence Suite has also been placed.
 
 
 ## How  RAG and watsonx.ai was utilized in this solution
 Retrieval-Augmented Generation (RAG) is a hybrid approach that combines:
+
  Retrieval of relevant documents from a knowledge base (Elasticsearch)
 Generation of answers from a Large Language Model (Watsonx.ai), conditioned on the retrieved context.
 
 In this project:
 Retrieval: Elasticsearch with vector embeddings (dense semantic search)
+
 Augmentation: The retrieved documents become the context
+
 Generation: IBM Watsonx Foundation Models (LLM) generate final answers using the question + context.
 
  Step 1: User question
 Example: “How does heavy rain affect vulnerable communities in Nairobi?”
+
  Step 2: Embedding of the question
 LangChain uses SentenceTransformers to embed the question vector.
+
 Step 3: Retrieval from Elasticsearch
 Elasticsearch uses kNN search on the index to find top-k relevant climate events.
+
 Step 4: Prompt construction
 LangChain concatenates the retrieved chunks into a context window.
+
 Step 5: Generation with Watsonx.ai
 LangChain sends the prompt (question + context) to Watsonx.ai.
 Watsonx.ai generates a natural language answer.
+
 Step 6: Return the final answer
 Answer is displayed in the notebook or printed in the console.
 
@@ -492,41 +499,63 @@ LangChain uses the question embedding to query Elasticsearch and get context par
 
 
 File: scripts/rag_pipeline.py
+
 from langchain.vectorstores import ElasticVectorSearch
+
 # Configure ElasticVectorSearch with embeddings
+
 vectorstore = ElasticVectorSearch(
+
     elasticsearch_url=es_host,
+    
     index_name="climate_knn_index",
+    
     embedding=embedding_fn,
+    
     es_user=es_user,
+    
     es_password=es_password
+    
 )
 
 
 # Generating answers with Watsonx
 
 WatsonxAI connects to the IBM watsonx.ai Foundation Model endpoint.
+
 This is the G (generation) in RAG.
+
 It uses the context (retrieved from Elasticsearch) and the user question to generate a final answer.
 
+
 File: scripts/rag_pipeline.py
+
 from langchain.llms import WatsonxAI
+
 from ibm_watsonx_ai import Credentials
+
 
 # Watsonx credentials
 credentials = Credentials(
+
     url="https://us-south.ml.cloud.ibm.com",
+    
     api_key=watsonx_api_key
+    
 )
 
 # WatsonxAI LangChain wrapper
+
 llm = WatsonxAI(credentials, project_id=watsonx_project_id)
 
 
 # Summary of combining Retrieval Augmented Generation with Generation of Text
  In this section LangChain’s RetrievalQA chain wraps:
+ 
 1. The retriever (Elasticsearch through LangChain).
-2. The generator (Watsonx through LangChain).
+   
+2.  The generator (Watsonx through LangChain).
+   
 It first retrieves relevant chunks, using Elasticsearch, and then feeds them, along with the question,  to Watsonx.ai for answer generation.
 
 File: scripts/rag_pipeline.py
@@ -535,9 +564,13 @@ from langchain.chains import RetrievalQA
 
 # Create the RAG pipeline
 qa_chain = RetrievalQA.from_chain_type(
+
     llm=llm,
+    
     chain_type="stuff",
+    
     retriever=vectorstore.as_retriever()
+    
 )
 
 
