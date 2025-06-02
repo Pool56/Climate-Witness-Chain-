@@ -7,6 +7,7 @@ _New to Git and GitHub? This free online course will get you up to speed quickly
   - [How our technology solution can help](#how-our-technology-solution-can-help)
   - [Our idea](#our-idea)
 - [Technology implementation](#technology-implementation)
+- [Judging criteria](#https://compete.05hackathon.watsonx-challenge.ibm.com/competitions/may25#judging )
   - [IBM watsonx product(s) used](#ibm-ai-services-used)
   - [Other IBM technology used](#other-ibm-technology-used)
 - [Additional details](#additional-details)
@@ -34,22 +35,69 @@ The future prospects are to have the application placed on hospitals for monitor
 Test the application performance on pharmaceutical firms so that they could assess the performance of the medications while taking into account environmental factors.
 Lastly, the application could be integrated to other softwares that climate scientists have  such as water engineers with regard to prediction of water shortage.
 
-### Success criteria
-
-Application of technology
-The application utilises various IBM technology such as Watsonx Assistant, Watsonx.ai, Cognos analysis, Watsonx Orchestrate and Watsonx.governance. The application also utilises IBM content from courses in the IBM SkillsBuild.
-The models (IBM technologies) are integrated into the solution by determining the relation of climatic factors such as temperature to medical conditions such as asthma.
-
-Business value.
-The value is based on reduction of time for  doctors who have a difficulty recommending what prescription to give their patients while taking into account environmental factors.
-
-Originality
-The uniqueness is integration of services from Watsonx with IBM's ESG software such as Environmental Intelligence Suite as well as use of  the Cognos analytics
-Another creative aspect is designing detailed text files and pdf documents from IBM SkillsBuild which enables users to understand the functionality of IBM software such as Watsonx.ai.
-
-
-
 ## Technology implementation
+
+## Judging criteria
+Feasibility:
+The solution is highly feasible given the maturity of the technologies used such as; Watsonx.ai, Elasticsearch, LangChain and  IBM Environmental Intelligence Suite. Each component is production-ready, well-documented, and widely supported.
+
+Thought-out and planned:
+The project is clearly modularized into data ingestion (via IBM EIS APIs), embedding and indexing, and a RAG pipeline that integrates Elasticsearch and Watsonx.ai. The modular design ensures that each component can be developed, tested, and improved independently, making it robust and easy to extend.
+
+Proof-of-concept:
+The proof-of-concept includes:
+Real IBM EIS data ingestion and storage.
+Embedding of documents using SentenceTransformers.
+Elasticsearch index creation and kNN search.
+A LangChain-based RAG pipeline integrating Watsonx.ai for answer generation.
+A Jupyter Notebook for interactive exploration.
+
+Application of IBM technology:
+IBM Watsonx.ai is the foundation for generative AI, providing large language model capabilities. IBM EIS supplies authoritative climate data to ground the answers in factual insights. The IBM Cloud environment and Elasticsearch integrations are clearly defined, showing practical use of IBM’s ecosystem.
+
+
+Creativity and innovation
+Unique and original approach:
+The project combines IBM’s EIS climate event data with Watsonx.ai to produce an innovative climate disaster Q&A tool that answers context-specific questions such as  flood risks using real, time-sensitive data.
+
+Differentiation in the market:
+Unlike standard generative AI chatbots, which is prone to  risk hallucinations, this solution uses a Retrieval-Augmented Generation (RAG) design that grounds answers in real-world climate data. This enhances trust, relevance, and reliability—key differentiators in the market.
+
+Novelty:
+
+Integration of IBM’s latest Foundation Models with LangChain’s RAG pipeline.
+ESG-focused design tailored to vulnerable communities and decision-makers.
+Embedding-driven semantic search using Elasticsearch—allowing precise, context-aware retrieval.
+
+Design and usability
+Design:
+The project is structured in clear, modular scripts and a user-friendly Jupyter Notebook, enabling quick adaptation by data scientists, climate analysts and policy teams.
+
+User experience:
+Users simply enter a question; the system handles retrieval, embedding, and answer generation seamlessly. Outputs are displayed in a readable format, ready for direct use in decision-making.
+
+Ease of use:
+Installation is straightforward through requirements.txt and .env, and all credentials are handled securely. Users can interact with the system via notebook, CLI or integrate it into an existing chatbot or dashboard with minimal effort.
+
+Real-world adoption:
+Because it uses standard components such as Python, Elasticsearch, IBM APIs and common open-source frameworks SentenceTransformers, LangChain, it’s easy to integrate into real-world workflows.
+
+
+Effectiveness and Efficiency
+Relevance:
+Addresses a high-priority issue: helping communities and policymakers quickly understand and respond to climate disasters (floods, heavy rain, earthquakes).
+
+Goal Achievement:
+Effectively retrieves relevant climate event data, combines it with generative AI, and provides context-rich, actionable answers tailored to user queries.
+
+Measurable Impact:
+By empowering faster, fact-based decisions, the solution helps reduce disaster response time and enhances community resilience—both measurable through metrics like response times, risk assessments, and policy outcomes.
+
+Scalability:
+The design supports scaling:
+More event types such as  droughts and  wildfires can be added easily.
+The solution can serve multiple regions or integrate with national disaster management systems.
+Additional languages or local dialects can be integrated using Watsonx’s multilingual capabilities.
 
 ### IBM watsonx product(s) used
 
@@ -57,18 +105,21 @@ Another creative aspect is designing detailed text files and pdf documents from 
 **Featured watsonx products**
 
 - [watsonx.ai](https://www.ibm.com/products/watsonx-ai) - WHERE AND HOW THIS IS USED IN OUR SOLUTION
-- The watsonx.ai (structure mode)  is used for generation of text by use of Granite 3.1-8b-Instruct
-- The watsonx.ai (structure mode)  is used to translate technical English terms to French by use of Granite 20B Multilingual Model
-- The watsonx.ai (structure mode) is used for generation of code by use  of Granite-20B-code-instruct
-- The watsonx.ai (structure mode) is used to explain code by use of Granite-34b-code-instruct  
-- The watsonx.ai (structure mode) is used for generation of new text from information obtained from the IBM SkillsBuild, by use of Granite 3.1-2B-instruct
-- The watsonx.ai ( chat mode) is used for generation of text by use of granite 3-8-b-instruct
-- [watsonx.governance](https://www.ibm.com/products/watsonx-governance) - WHERE AND HOW THIS IS USED IN OUR SOLUTION
-- The watsonx.governance was used to detect levels or presence of hallucinations of codes being  created as well as providing solutions,by use of Granite Guardian 3.1 8B
+- After relevant context is retrieved, it is fed into IBM Watsonx.ai, a powerful generative AI model. Watsonx.ai synthesizes the retrieved context with the user’s question to produce a natural language answer. This helps disaster response teams:
+ Get actionable insights tailored to their question.
+ Understand complex climate impacts without requiring data analysis skills.
+ Make fast, data-driven decisions during a crisis.
+- [Environmental Intelligence Suite](https://https://www.ibm.com/products/environmental-intelligence) - WHERE AND HOW THIS IS USED IN OUR SOLUTION
+- IBM’s Environmental Intelligence Suite (EIS) offers high-quality, up-to-date climate data on event types such as heavy rains, floods, earthquakes, and droughts. This solution uses the EIS API to fetch event descriptions, locations, severity levels, and timestamps. This rich dataset provides the factual backbone for accurate decision-making, helping teams:
+  Identify high-risk areas and affected populations.
+  Monitor event severity and predict escalation.
+ Coordinate targeted interventions and resource allocation.
+
+
 
 
 ### Other IBM technology used
-IBM Environmental Intelligence Suite was used to examine geospatial, weather and climate data which are main factors that water engineers take into account when drilling boreholes. Cognos Analytics was used so as to formulate AI-powered responses and insights from factors that could affect water access such as examining scope emission report from IBM Envizi so as determine possible level of carbon contamination of water.This insights could be used for making data-driven decisions
+
 
 ## Additional-details
 ## Contents of Github
