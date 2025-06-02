@@ -145,7 +145,7 @@ jupyter notebook notebooks/climate_rag_notebook.ipynb
 
 #  requirements.txt
 
-```text
+
 ibm-watsonx-ai>=1.0.312
 elasticsearch
 langchain
