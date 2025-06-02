@@ -91,7 +91,7 @@ Goal Achievement:
 Effectively retrieves relevant climate event data, combines it with generative AI, and provides context-rich, actionable answers tailored to user queries.
 
 Measurable Impact:
-By empowering faster, fact-based decisions, the solution helps reduce disaster response time and enhances community resilience—both measurable through metrics like response times, risk assessments, and policy outcomes.
+By empowering faster, fact-based decisions, the solution helps reduce disaster response time and enhances community resilience both measurable through metrics like response times, risk assessments, and policy outcomes.
 
 Scalability:
 The design supports scaling:
@@ -120,22 +120,35 @@ Additional languages or local dialects can be integrated using Watsonx’s multi
  Coordinate targeted interventions and resource allocation.
 - [Jupter notebook] ( https://jupyter.org/)-WHERE AND HOW THIS IS USED IN OUR SOLUTION
 - Provides an interactive Jupyter Notebook interface for:
+  
   -Testing the RAG pipeline.
+  
   -Experimenting with different queries.
+  
   -Visualizing answers.
+  
 ## Github repository
 # Create a .env file with:
 WATSONX_API_KEY=your_api_key
+
 WATSONX_PROJECT_ID=your_project_id
+
 EIS_API_KEY=your_eis_api_key
+
 ELASTICSEARCH_HOST=your_elasticsearch_host
+
 ELASTICSEARCH_USERNAME=your_elasticsearch_username
+
 ELASTICSEARCH_PASSWORD=your_elasticsearch_password
+
 
 # Install dependencies:
 python3 -m venv venv
+
 source venv/bin/activate
+
 pip install -r requirements.txt
+
 
 # Run the notebook:
 jupyter notebook notebooks/climate_rag_notebook.ipynb
@@ -146,19 +159,30 @@ jupyter notebook notebooks/climate_rag_notebook.ipynb
 #  requirements.txt
 
 ibm-watsonx-ai>=1.0.312
+
 elasticsearch
+
 langchain
+
 sentence-transformers
+
 pandas
+
 nltk
+
 wget
+
 evaluate
+
 pydantic==1.10.0
 
 #  scripts/fetch_eis_data.py
 import os
+
 import requests
+
 import wget
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -169,23 +193,36 @@ def fetch_climate_data(event_type="heavy_rain"):
     """
     Fetch climate event data from IBM Environmental Intelligence Suite (EIS)
     and save it locally as JSON.
+    
     """
     url = f"https://api.eis.ibm.com/v1/events?eventType={event_type}"
+    
     headers = {"Authorization": f"Bearer {EIS_API_KEY}"}
+    
     response = requests.get(url, headers=headers)
+    
     if response.status_code == 200:
+    
         output_path = f"data/eis_reports/{event_type}.json"
+        
         with open(output_path, "w") as f:
+        
             f.write(response.text)
+            
         print(f" Data saved to {output_path}")
+        
     else:
+    
         print(f" Failed to fetch EIS data: {response.status_code} - {response.text}")
 
 if __name__ == "__main__":
+
     fetch_climate_data("heavy_rain")
+    
     fetch_climate_data("earthquake")
 
 #  scripts/create_index_and_embed.py
+
 import os
 
 import json
@@ -206,11 +243,15 @@ load_dotenv()
 
 # Load ES credentials
 es_host = os.getenv("ELASTICSEARCH_HOST")
+
 es_user = os.getenv("ELASTICSEARCH_USERNAME")
+
 es_password = os.getenv("ELASTICSEARCH_PASSWORD")
 
 es_client = Elasticsearch(
+
     hosts=[es_host],
+    
     basic_auth=(es_user, es_password)
 )
 
@@ -219,55 +260,96 @@ embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 index_name = "climate_knn_index"
 
 def create_index(dims=384):
+
     """
     Creates an Elasticsearch index for climate data with vector support.
     """
     mapping = {
+    
         "properties": {
+        
             "text": {"type": "text"},
+            
             "embedding": {
+            
                 "type": "dense_vector",
+                
                 "dims": dims,
+                
                 "index": True,
+                
                 "similarity": "l2_norm"
+                
             }
+            
         }
+        
     }
+    
     if es_client.indices.exists(index=index_name):
+    
         es_client.indices.delete(index=index_name)
+        
     es_client.indices.create(index=index_name, mappings=mapping)
+    
     print(f" Index '{index_name}' created.")
+    
 
 def index_documents():
+
     """
     Indexes EIS documents into Elasticsearch with embeddings.
     """
     file_path = "data/eis_reports/heavy_rain.json"
+    
     with open(file_path, "r") as f:
+    
         data = json.load(f)
+        
     documents = data.get("events", [])
+    
     docs = []
+    
     for i, event in enumerate(documents):
+    
         text = event.get("description", "")
+        
         embedding = embedding_model.encode(text).tolist()
+        
         doc = {
+        
             "_id": i,
+            
             "_index": index_name,
+            
             "_source": {
+            
                 "text": text,
+                
                 "embedding": embedding
+                
             }
+            
         }
+        
         docs.append(doc)
+        
     bulk(es_client, docs)
+    
     es_client.indices.refresh(index=index_name)
+    
     print(f" Indexed {len(docs)} documents into '{index_name}'.")
+    
 
 if __name__ == "__main__":
+
     create_index()
+    
     index_documents()
+    
 
 # scripts/rag_pipeline.py
+
 import os
 
 from dotenv import load_dotenv
@@ -289,63 +371,92 @@ load_dotenv()
 
 # Elasticsearch client
 es_host = os.getenv("ELASTICSEARCH_HOST")
+
 es_user = os.getenv("ELASTICSEARCH_USERNAME")
+
 es_password = os.getenv("ELASTICSEARCH_PASSWORD")
 
+
 embedding_fn = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+
 vectorstore = ElasticVectorSearch(
+
     elasticsearch_url=es_host,
+    
     index_name="climate_knn_index",
+    
     embedding=embedding_fn,
+    
     es_user=es_user,
+    
     es_password=es_password
+    
 )
+
 
 # Watsonx LLM
 watsonx_api_key = os.getenv("WATSONX_API_KEY")
+
 watsonx_project_id = os.getenv("WATSONX_PROJECT_ID")
+
 credentials = Credentials(
+
     url="https://us-south.ml.cloud.ibm.com",
+    
     api_key=watsonx_api_key
+    
 )
 llm = WatsonxAI(credentials, project_id=watsonx_project_id)
 
 qa_chain = RetrievalQA.from_chain_type(
+
     llm=llm,
+    
     chain_type="stuff",
+    
     retriever=vectorstore.as_retriever()
+    
 )
 
 def answer_question(question_text):
+
     """
     Answers a climate disaster–related question using the RAG pipeline.
+    
     """
     answer = qa_chain.run(question_text)
+    
     print(f"Question: {question_text}\nAnswer: {answer}\n")
+    
     return answer
 
 if __name__ == "__main__":
     sample_question = "How does heavy rain affect vulnerable communities in Nairobi?"
+    
     answer_question(sample_question)
+    
 
 # notebooks/climate_rag_notebook.ipynb
 In Jupyter Notebook;
 
+
 from scripts.rag_pipeline import answer_question
 
+
 question = "How does climate change increase the risk of floods in Nairobi?"
+
 answer = answer_question(question)
+
 print(answer)
 
 
 
 ## Contents of Github
-In the Github section links for the notebooks made by use of the watsonx.ai
-In the docs section documents such as details of the foundation models of IBM Granite are placed, in an excel document.
-Additionally a text file has been placed describing features of IBM granite models from a medical point of view.
+In the Github section links for the notebooks and python code of the use of watsonx.ai have been placed.
+
+In the docs section powerpoint of the presentation used in the video has been placed.
 An excel sheets highlighting contents of the Environmental Intelligence Suite has also been placed.
-There are powerpoint documents from courses in the IBM SkillsBuild whose texts have been rephrased by use of Granite models.
-The images section contains solution architectures of our project
+
 
 ## How  RAG and watsonx.ai was utilized in this solution
 Retrieval-Augmented Generation (RAG) is a hybrid approach that combines:
