@@ -1,5 +1,4 @@
-_New to Git and GitHub? This free online course will get you up to speed quickly: [Getting Started with Git and GitHub](https://www.coursera.org/learn/getting-started-with-git-and-github)_.
-
+# GrinditeGrandite
 # Contents
 
 - [Project summary](#project-summary)
