@@ -44,6 +44,8 @@ MeTTa Solution: Embeds these metrics into if-then rules, enabling automatic trig
 ### How our technology solution can help
 
 The solution could help by gathering real time data so as to aid reseachers such as; doctors and pharmacists to make appropriate decisions with regard to designing medical products, accurately analysing weather patterns, creation of code that relates to medical prescription and providing explanation to code.
+This link can be used by African communities to upload photos or videos. Additionally, technical experts can use the data obtained from African communities to derive insights and eventually send reports to disaster management firms and insurance companies
+https://climate-witness-repo-nneg.bolt.host/
 
 ### Our idea
 The idea is creation of an Intelligent  assistant that is able to answer queries with regard to health sciences and climatic patterns.
