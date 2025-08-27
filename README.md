@@ -101,11 +101,11 @@ Impact and scalability <img width="904" height="193" alt="image" src="https://gi
 
 ## Featured software products
 
-AutoCAD → Provides engineering drawings and dimensional data of assets such as pipes, greenhouses, and irrigation systems. These dimensions inform capacity, flow rate, material requirements, and plant spacing.
+AutoCAD → Provides engineering drawings and dimensional data of assets such as pipes, greenhouses, and irrigation systems. These dimensions illustrate  parameters such as  capacity, flow rate and even  material requirements
 
-Microsoft Excel → Performs baseline statistical calculations (mean, variance, standard deviation) from climate and economic datasets, enabling detection of anomalies and performance trends.
+Microsoft Excel → Performs baseline statistical calculations such as mean, variance, standard deviation from climate and economic datasets, enabling detection of anomalies and performance trends.
 
-MeTTa → Integrates AutoCAD-derived measurements and Excel-calculated metrics into a knowledge graph, where correlations can be mapped (e.g., droughts vs. crop failures). It further enables automated reasoning and triggering of smart contracts once disaster thresholds are detected.
+MeTTa → Integrates AutoCAD-derived measurements and Excel-calculated metrics into a knowledge graph, where correlations can be mapped such as  droughts versus. crop failures. It further enables automated reasoning and triggering of smart contracts once disaster thresholds are detected. For the Metta file of ProjectAgriAccess the end result is a ratio in the form of a decimal that describes the extent of damage.
 
 
 
