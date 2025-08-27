@@ -7,7 +7,7 @@
   - [Our idea](#our-idea)
 - [Technology implementation](#technology-implementation)
 - [Judging criteria](#judging-criteria)
-  - [Featured software  products ](#Featured software products#)
+  - [Featured software products](#Featured software products)
 - [Github repository](#github-repository)
   - [Contributing](#contributing)
   - [Versioning](#versioning)
