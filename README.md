@@ -113,326 +113,42 @@ Relevance of MeTTa<img width="861" height="193" alt="image" src="https://github.
   -Visualizing answers.
   
 ## Github repository
-# Create a .env file with:
-WATSONX_API_KEY=your_api_key
 
-WATSONX_PROJECT_ID=your_project_id
+# ===============================
+# AutoCAD Dimension Analysis Code
+# ===============================
 
-EIS_API_KEY=your_eis_api_key
+# Define a pipe with length, diameter, and flow velocity
+(pipe "P1" length 100 diameter 0.5 velocity 2)
 
-ELASTICSEARCH_HOST=your_elasticsearch_host
-
-ELASTICSEARCH_USERNAME=your_elasticsearch_username
-
-ELASTICSEARCH_PASSWORD=your_elasticsearch_password
-
-
-# Install dependencies:
-python3 -m venv venv
-
-source venv/bin/activate
-
-pip install -r requirements.txt
-
-
-# Run the notebook:
-jupyter notebook notebooks/climate_rag_notebook.ipynb
-
-# License
-
-
-#  requirements.txt
-
-ibm-watsonx-ai>=1.0.312
-
-elasticsearch
-
-langchain
-
-sentence-transformers
-
-pandas
-
-nltk
-
-wget
-
-evaluate
-
-pydantic==1.10.0
-
-#  scripts/fetch_eis_data.py
-import os
-
-import requests
-
-import wget
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
-EIS_API_KEY = os.getenv("EIS_API_KEY")
-
-def fetch_climate_data(event_type="heavy_rain"):
-    """
-    Fetch climate event data from IBM Environmental Intelligence Suite (EIS)
-    and save it locally as JSON.
-    
-    """
-    url = f"https://api.eis.ibm.com/v1/events?eventType={event_type}"
-    
-    headers = {"Authorization": f"Bearer {EIS_API_KEY}"}
-    
-    response = requests.get(url, headers=headers)
-    
-    if response.status_code == 200:
-    
-        output_path = f"data/eis_reports/{event_type}.json"
-        
-        with open(output_path, "w") as f:
-        
-            f.write(response.text)
-            
-        print(f" Data saved to {output_path}")
-        
-    else:
-    
-        print(f" Failed to fetch EIS data: {response.status_code} - {response.text}")
-
-if __name__ == "__main__":
-
-    fetch_climate_data("heavy_rain")
-    
-    fetch_climate_data("earthquake")
-
-#  scripts/create_index_and_embed.py
-
-import os
-
-import json
-
-import pandas as pd
-
-from elasticsearch import Elasticsearch
-
-from elasticsearch.helpers import bulk
-
-from sentence_transformers import SentenceTransformer
-
-from langchain.embeddings import SentenceTransformerEmbeddings
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# Load ES credentials
-es_host = os.getenv("ELASTICSEARCH_HOST")
-
-es_user = os.getenv("ELASTICSEARCH_USERNAME")
-
-es_password = os.getenv("ELASTICSEARCH_PASSWORD")
-
-es_client = Elasticsearch(
-
-    hosts=[es_host],
-    
-    basic_auth=(es_user, es_password)
+# Calculate water flow using formula Q = Area * Velocity
+# Area = π * (diameter/2)^2
+(calc-pipe-flow
+    (pipe $id length $l diameter $d velocity $v)
+    (= $area (* 3.1416 (* (/ $d 2) (/ $d 2))))   # Area = πr²
+    (= $flow (* $area $v))                        # Flow = Area * velocity
+    (return $flow)
 )
 
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+# Define greenhouse cover with thickness and material type
+(greenhouse "GH1" thickness 0.01 material "polyethylene")
 
-index_name = "climate_knn_index"
-
-def create_index(dims=384):
-
-    """
-    Creates an Elasticsearch index for climate data with vector support.
-    """
-    mapping = {
-    
-        "properties": {
-        
-            "text": {"type": "text"},
-            
-            "embedding": {
-            
-                "type": "dense_vector",
-                
-                "dims": dims,
-                
-                "index": True,
-                
-                "similarity": "l2_norm"
-                
-            }
-            
-        }
-        
-    }
-    
-    if es_client.indices.exists(index=index_name):
-    
-        es_client.indices.delete(index=index_name)
-        
-    es_client.indices.create(index=index_name, mappings=mapping)
-    
-    print(f" Index '{index_name}' created.")
-    
-
-def index_documents():
-
-    """
-    Indexes EIS documents into Elasticsearch with embeddings.
-    """
-    file_path = "data/eis_reports/heavy_rain.json"
-    
-    with open(file_path, "r") as f:
-    
-        data = json.load(f)
-        
-    documents = data.get("events", [])
-    
-    docs = []
-    
-    for i, event in enumerate(documents):
-    
-        text = event.get("description", "")
-        
-        embedding = embedding_model.encode(text).tolist()
-        
-        doc = {
-        
-            "_id": i,
-            
-            "_index": index_name,
-            
-            "_source": {
-            
-                "text": text,
-                
-                "embedding": embedding
-                
-            }
-            
-        }
-        
-        docs.append(doc)
-        
-    bulk(es_client, docs)
-    
-    es_client.indices.refresh(index=index_name)
-    
-    print(f" Indexed {len(docs)} documents into '{index_name}'.")
-    
-
-if __name__ == "__main__":
-
-    create_index()
-    
-    index_documents()
-    
-
-# scripts/rag_pipeline.py
-
-import os
-
-from dotenv import load_dotenv
-
-from elasticsearch import Elasticsearch
-
-from langchain.embeddings import SentenceTransformerEmbeddings
-
-from langchain.vectorstores import ElasticVectorSearch
-
-from langchain.chains import RetrievalQA
-
-from langchain.llms import WatsonxAI
-
-from ibm_watsonx_ai import Credentials
-
-
-load_dotenv()
-
-# Elasticsearch client
-es_host = os.getenv("ELASTICSEARCH_HOST")
-
-es_user = os.getenv("ELASTICSEARCH_USERNAME")
-
-es_password = os.getenv("ELASTICSEARCH_PASSWORD")
-
-
-embedding_fn = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-
-vectorstore = ElasticVectorSearch(
-
-    elasticsearch_url=es_host,
-    
-    index_name="climate_knn_index",
-    
-    embedding=embedding_fn,
-    
-    es_user=es_user,
-    
-    es_password=es_password
-    
+# Calculate insulation factor based on thickness
+(calc-insulation
+    (greenhouse $id thickness $t material $m)
+    (= $insulation (* 200 $t))                    # Example formula: factor = 200 * thickness
+    (return $insulation)
 )
 
+# Define plant size in length, width, and thickness
+(plant "Plant1" length 0.5 width 0.3 thickness 0.1)
 
-# Watsonx LLM
-watsonx_api_key = os.getenv("WATSONX_API_KEY")
-
-watsonx_project_id = os.getenv("WATSONX_PROJECT_ID")
-
-credentials = Credentials(
-
-    url="https://us-south.ml.cloud.ibm.com",
-    
-    api_key=watsonx_api_key
-    
+# Calculate plant volume
+(calc-plant-volume
+    (plant $id length $l width $w thickness $t)
+    (= $volume (* $l $w $t))                      # Volume = L * W * T
+    (return $volume)
 )
-llm = WatsonxAI(credentials, project_id=watsonx_project_id)
-
-qa_chain = RetrievalQA.from_chain_type(
-
-    llm=llm,
-    
-    chain_type="stuff",
-    
-    retriever=vectorstore.as_retriever()
-    
-)
-
-def answer_question(question_text):
-
-    """
-    Answers a climate disaster–related question using the RAG pipeline.
-    
-    """
-    answer = qa_chain.run(question_text)
-    
-    print(f"Question: {question_text}\nAnswer: {answer}\n")
-    
-    return answer
-
-if __name__ == "__main__":
-    sample_question = "How does heavy rain affect vulnerable communities in Nairobi?"
-    
-    answer_question(sample_question)
-    
-
-# notebooks/climate_rag_notebook.ipynb
-In Jupyter Notebook;
-
-
-from scripts.rag_pipeline import answer_question
-
-
-question = "How does climate change increase the risk of floods in Nairobi?"
-
-answer = answer_question(question)
-
-print(answer)
 
 
 
