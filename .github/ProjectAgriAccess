@@ -1,0 +1,117 @@
+; -------------------------
+; Pipe knowledge base
+; -------------------------
+
+(: pipe_length Number)
+(: pipe_diameter Number)
+(: pipe_velocity Number)
+
+; Example pipe instance
+(pipe_length my_pipe 15)          ; meters
+(pipe_diameter my_pipe 0.15)      ; meters
+(pipe_material my_pipe PVC)
+(pipe_velocity my_pipe 1.5)       ; m/s
+
+; Cross-sectional area of pipe
+(= (cross_section_area $pipe)
+   (* 3.1416 (/ ((py-atom math.pow) (match &self (pipe_diameter $name $radius) $radius) 2) 4)))
+
+!(cross_section_area my_pipe)
+; Volume capacity of pipe
+(= (pipe_volume $pipe)
+   (* (cross_section_area $pipe) (pipe_length $pipe)))
+
+; Internal surface area
+(= (pipe_surface_area $pipe)
+   (* 3.1416 (pipe_diameter $pipe) (pipe_length $pipe)))
+
+; Flow rate
+(= (pipe_flow_rate $pipe)
+   (* (cross_section_area $pipe) (pipe_velocity $pipe)))
+
+; Material roughness knowledge base
+(pipe_roughness PVC 0.0015)
+(pipe_roughness Steel 0.045)
+(pipe_roughness Concrete 0.3)
+(pipe_roughness Copper 0.0015)
+
+
+; -------------------------
+; Greenhouse Cover Knowledge Base
+; -------------------------
+
+(: cover_thickness Number)
+(: cover_material Symbol)
+(: cover_shape Symbol)
+
+; Example greenhouse cover
+(cover_thickness my_cover 200)         ; mm
+(cover_material my_cover Polycarbonate)
+(cover_shape my_cover dome)
+
+; Light transmission properties
+(light_transmission polyethylene 85)
+(light_transmission polycarbonate 90)
+(light_transmission glass 95)
+(light_transmission shade_net 60)
+
+; Insulation (U-values)
+(insulation polyethylene 6.0)
+(insulation polycarbonate 3.5)
+(insulation glass 5.8)
+(insulation shade_net 10.0)
+
+; UV protection ratings
+(uv_protection polyethylene Moderate)
+(uv_protection polycarbonate High)
+(uv_protection glass VeryHigh)
+(uv_protection shade_net Low)
+
+
+; -------------------------
+; Plant Space Knowledge Base
+; -------------------------
+
+(: plant_length Number)
+(: plant_width Number)
+(: plant_height Number)
+(: plant_growth_factor Number)
+
+; Example plant
+(plant_length my_plant 40)          ; cm
+(plant_width my_plant 30)           ; cm
+(plant_height my_plant 60)          ; cm
+(plant_growth_factor my_plant 1.2)
+
+; Plant footprint area
+(= (plant_footprint $p)
+   (* (plant_length $p) (plant_width $p) (plant_growth_factor $p)))
+
+; Plant volume
+(= (plant_volume $p)
+   (* (plant_length $p) (plant_width $p) (plant_height $p) (plant_growth_factor $p)))
+
+; Estimate number of plants in a greenhouse (area in m²)
+(= (plant_capacity $p $greenhouse_area_m2)
+   (div $greenhouse_area_m2 (/ (plant_footprint $p) 10000)))
+
+
+; -------------------------
+; Example Queries
+; -------------------------
+
+; What is the volume of the pipe?
+(pipe_volume my_pipe)
+
+; What is the flow rate?
+(pipe_flow_rate my_pipe)
+
+; What is the light transmission of my_cover material?
+(light_transmission (cover_material my_cover))
+
+; What is the volume of the plant?
+(plant_volume my_plant)
+
+; How many plants can fit in 200 m² greenhouse?
+(plant_capacity my_plant 200)
+
