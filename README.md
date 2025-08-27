@@ -1,4 +1,4 @@
-# GrinditeGrandite
+# Climate Witness Chain
 # Contents
 
 - [Project summary](#project-summary)
@@ -7,10 +7,8 @@
   - [Our idea](#our-idea)
 - [Technology implementation](#technology-implementation)
 - [Judging criteria](#judging-criteria)
-  - [IBM watsonx product(s) used](#ibm-ai-services-used)
-  - [Other IBM technology used](#other-ibm-technology-used)
+  - [Featured software  product(s) used](#Featured software products#)
 - [Github repository](#github-repository)
-- [How  RAG and watsonx.ai was utilized in this solution](#how-RAG-and-watsonx.ai-was-utilized-in-this-solution)
   - [Contributing](#contributing)
   - [Versioning](#versioning)
   - [Authors](#authors)
@@ -81,39 +79,37 @@ Smart contracts auto-execute this includes release of microinsurance payouts, al
 
 ## Judging criteria 
 Relevance of MeTTa<img width="861" height="193" alt="image" src="https://github.com/user-attachments/assets/5f896b19-86e3-4d74-b8c3-3705725ad447" />
+<img width="1016" height="686" alt="image" src="https://github.com/user-attachments/assets/a27f7ffc-be9a-493a-b66a-6174c9076b43" />
+
+
+Technical implementation<img width="1031" height="193" alt="image" src="https://github.com/user-attachments/assets/06324848-7857-4dbc-93bf-7cd4febf8898" />
+<img width="1482" height="830" alt="image" src="https://github.com/user-attachments/assets/26cc6102-6ab5-45e3-a6df-3d774cd790ca" />
+
+Usability and user experience
+<img width="626" height="105" alt="image" src="https://github.com/user-attachments/assets/b6dfc591-d26e-4b52-9edc-7d2869df46d3" />
+<img width="1624" height="829" alt="image" src="https://github.com/user-attachments/assets/90569a20-1978-4031-b1df-cbd05b54960b" />
+
+
+Impact and scalability <img width="904" height="193" alt="image" src="https://github.com/user-attachments/assets/91ce75ac-edf2-4d0a-b981-1824384825db" />
+
+<img width="1676" height="607" alt="image" src="https://github.com/user-attachments/assets/0a71fa77-68cb-41b3-8294-c6b5673fcfd9" />
 
 
 
-### IBM watsonx product(s) used
 
+**Featured software products**
 
-**Featured watsonx products**
+AutoCAD → Provides engineering drawings and dimensional data of assets such as pipes, greenhouses, and irrigation systems. These dimensions inform capacity, flow rate, material requirements, and plant spacing.
 
-- [watsonx.ai](https://www.ibm.com/products/watsonx-ai) - WHERE AND HOW THIS IS USED IN OUR SOLUTION
-- After relevant context is retrieved, it is fed into IBM Watsonx.ai, a powerful generative AI model. Watsonx.ai synthesizes the retrieved context with the user’s question to produce a natural language answer. This helps disaster response teams:
- Get actionable insights tailored to their question.
- Understand complex climate impacts without requiring data analysis skills.
- Make fast, data-driven decisions during a crisis.
+Microsoft Excel → Performs baseline statistical calculations (mean, variance, standard deviation) from climate and economic datasets, enabling detection of anomalies and performance trends.
+
+MeTTa → Integrates AutoCAD-derived measurements and Excel-calculated metrics into a knowledge graph, where correlations can be mapped (e.g., droughts vs. crop failures). It further enables automated reasoning and triggering of smart contracts once disaster thresholds are detected.
 
 
 
-### Other IBM technology used
- -[Environmental Intelligence Suite](https://https://www.ibm.com/products/environmental-intelligence) - WHERE AND HOW THIS IS USED IN OUR SOLUTION
-- IBM’s Environmental Intelligence Suite (EIS) offers high-quality, up-to-date climate data on event types such as heavy rains, floods, earthquakes, and droughts. This solution uses the EIS API to fetch event descriptions, locations, severity levels, and timestamps. This rich dataset provides the factual backbone for accurate decision-making, helping teams:
-  Identify high-risk areas and affected populations.
-  Monitor event severity and predict escalation.
- Coordinate targeted interventions and resource allocation.
-- [Jupter notebook] ( https://jupyter.org/)-WHERE AND HOW THIS IS USED IN OUR SOLUTION
-- Provides an interactive Jupyter Notebook interface for:
-  
-  -Testing the RAG pipeline.
-  
-  -Experimenting with different queries.
-  
-  -Visualizing answers.
   
 ## Github repository
-
+# 1.AutoCAD Dimensions → Use case of  Water, Greenhouse material used to cover plants, plant analysis
 # ===============================
 # AutoCAD Dimension Analysis Code
 # ===============================
@@ -151,6 +147,68 @@ Relevance of MeTTa<img width="861" height="193" alt="image" src="https://github.
 )
 
 
+# 2. Disaster correlation and  region identifiers
+# ================================
+# Disaster Mapping & Correlation
+# ================================
+
+# Define regions with disasters, severity, and time
+(disaster "Flood" region "R1" severity 8 time 2020)
+(disaster "Drought" region "R1" severity 6 time 2021)
+(disaster "Earthquake" region "R2" severity 9 time 2022)
+
+# Assign a unique identifier to a disaster event
+(assign-id
+    (disaster $type region $r severity $s time $t)
+    (= $id (+ (* $s 1000) $t))      # ID formula: severity*1000 + year
+    (return $id)
+)
+
+# Map correlations between disasters in same region
+(map-correlation
+    (disaster $type1 region $r severity $s1 time $t1)
+    (disaster $type2 region $r severity $s2 time $t2)
+    (= $diff (- $t2 $t1))           # Time gap between disasters
+    (= $severity-gap (- $s2 $s1))   # Change in severity
+    (return (list $diff $severity-gap))
+)
+
+# 3.  Excel Data → Standard deviation analysis and  Smart contracts
+# ============================================
+# Excel Data Analysis & Smart Contract Triggers
+# ============================================
+
+# Import numbers from Excel (simulated as dataset)
+(excel-data "rainfall" values (100 120 90 80 110))
+
+# Calculate mean rainfall
+(calc-mean
+    (excel-data "rainfall" values $vals)
+    (= $sum (reduce + $vals))                    # Sum of all values
+    (= $n (length $vals))                        # Count of values
+    (= $mean (/ $sum $n))                        # Mean = sum/n
+    (return $mean)
+)
+
+# Calculate standard deviation
+(calc-stddev
+    (excel-data "rainfall" values $vals)
+    (= $mean (calc-mean (excel-data "rainfall" values $vals)))
+    (= $sqdiffs (map (lambda $x (- $x $mean)^2) $vals)) # Squared diffs
+    (= $variance (/ (reduce + $sqdiffs) (length $vals)))
+    (= $stddev (sqrt $variance))
+    (return $stddev)
+)
+
+# Trigger smart contract when rainfall deviates significantly
+(trigger-smart-contract
+    (excel-data "rainfall" values $vals)
+    (= $stddev (calc-stddev (excel-data "rainfall" values $vals)))
+    (if (> $stddev 15)                             # Threshold for anomaly
+        (return "Smart Contract Triggered: Insurance payout released")
+        (return "No Trigger: Conditions normal")
+    )
+)
 
 ## Contents of Github
 In the Github section links for the python code of the use of watsonx.ai has been placed.
@@ -158,121 +216,6 @@ In the docs section powerpoint of the presentation used in the video has been pl
 An excel sheets highlighting contents of the Environmental Intelligence Suite has also been placed.
 
 
-## How  RAG and watsonx.ai was utilized in this solution
-Retrieval-Augmented Generation (RAG) is a hybrid approach that combines:
-
- Retrieval of relevant documents from a knowledge base (Elasticsearch)
-Generation of answers from a Large Language Model (Watsonx.ai), conditioned on the retrieved context.
-
-In this project:
-Retrieval: Elasticsearch with vector embeddings (dense semantic search)
-
-Augmentation: The retrieved documents become the context
-
-Generation: IBM Watsonx Foundation Models (LLM) generate final answers using the question + context.
-
- Step 1: User question
-Example: “How does heavy rain affect vulnerable communities in Nairobi?”
-
- Step 2: Embedding of the question
-LangChain uses SentenceTransformers to embed the question vector.
-
-Step 3: Retrieval from Elasticsearch
-Elasticsearch uses kNN search on the index to find top-k relevant climate events.
-
-Step 4: Prompt construction
-LangChain concatenates the retrieved chunks into a context window.
-
-Step 5: Generation with Watsonx.ai
-LangChain sends the prompt (question + context) to Watsonx.ai.
-Watsonx.ai generates a natural language answer.
-
-Step 6: Return the final answer
-Answer is displayed in the notebook or printed in the console.
-
-
-
-Where is RAG implemented:
-Elasticsearch stores the climate event descriptions as text plus dense vector embeddings.
- LangChain’s ElasticVectorSearch connects to Elasticsearch to retrieve top-k similar documents for each user query.
-This is the R (retrieval) in RAG.
-LangChain uses the question embedding to query Elasticsearch and get context paragraphs.
-
-
-File: scripts/rag_pipeline.py
-
-from langchain.vectorstores import ElasticVectorSearch
-
-# Configure ElasticVectorSearch with embeddings
-
-vectorstore = ElasticVectorSearch(
-
-    elasticsearch_url=es_host,
-    
-    index_name="climate_knn_index",
-    
-    embedding=embedding_fn,
-    
-    es_user=es_user,
-    
-    es_password=es_password
-    
-)
-
-
-# Generating answers with Watsonx
-
-WatsonxAI connects to the IBM watsonx.ai Foundation Model endpoint.
-
-This is the G (generation) in RAG.
-
-It uses the context (retrieved from Elasticsearch) and the user question to generate a final answer.
-
-
-File: scripts/rag_pipeline.py
-
-from langchain.llms import WatsonxAI
-
-from ibm_watsonx_ai import Credentials
-
-
-# Watsonx credentials
-credentials = Credentials(
-
-    url="https://us-south.ml.cloud.ibm.com",
-    
-    api_key=watsonx_api_key
-    
-)
-
-# WatsonxAI LangChain wrapper
-
-llm = WatsonxAI(credentials, project_id=watsonx_project_id)
-
-
-# Summary of combining Retrieval Augmented Generation with Generation of Text
- In this section LangChain’s RetrievalQA chain wraps:
- 
-1. The retriever (Elasticsearch through LangChain).
-   
-2.  The generator (Watsonx through LangChain).
-   
-It first retrieves relevant chunks, using Elasticsearch, and then feeds them, along with the question,  to Watsonx.ai for answer generation.
-
-File: scripts/rag_pipeline.py
-
-from langchain.chains import RetrievalQA
-
-# Create the RAG pipeline
-qa_chain = RetrievalQA.from_chain_type(
-
-    llm=llm,
-    
-    chain_type="stuff",
-    
-    retriever=vectorstore.as_retriever()
-    
-)
 
 
 
