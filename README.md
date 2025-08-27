@@ -7,7 +7,7 @@
   - [Our idea](#our-idea)
 - [Technology implementation](#technology-implementation)
 - [Judging criteria](#judging-criteria)
-  - [Featured software  product(s) used](#Featured software products#)
+  - [Featured software  products ](#Featured software products#)
 - [Github repository](#github-repository)
   - [Contributing](#contributing)
   - [Versioning](#versioning)
@@ -97,7 +97,7 @@ Impact and scalability <img width="904" height="193" alt="image" src="https://gi
 
 
 
-**Featured software products**
+## Featured software products
 
 AutoCAD → Provides engineering drawings and dimensional data of assets such as pipes, greenhouses, and irrigation systems. These dimensions inform capacity, flow rate, material requirements, and plant spacing.
 
