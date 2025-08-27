@@ -19,11 +19,30 @@
 
 
 ## Project summary
-Our project focuses on mitigating effects of climate change by use of IBM technologies such as Watsonx and Cognos analytics. The sectors we are targeting are health and climate while the beneficiaries of our solution are climate scientists, doctors, pharmacists and people with medical conditions such as those who are asthmatic.  The solution first starts with collection of information about IBM granite models, climate data and health details of people. The second step is establishing a relation health and climate by using the structure mode of watsonx.ai. Then the generated text and code by from Watsonx.ai is analysed by Watsonx.governance while using Granite guardian 3.1 8B, the purpose is to determine presence of hallucinations. Afterwards, the generated text is placed into a text file which is then uploaded to the chat mode of watsonx.ai, the text file is used to ground responses. The text file has  medical descriptions illustrating features of Granite models. The purpose is to create an intelligent assistant which provides customised responses based on the profession of a person such as a doctor or a climate scientist.  Additionally, the project involves use of data from IBM's ESG applications such as the Environmental Intelligence Suite so as to enable doctors and pharmacists to make informed decisions about the how their medications would perform in hostile climates such as regions with high temperature. We are creating learning materials in the form of powerpoints for either doctors, pharmacists or climate scientists such as water engineers  who are not conversant to IBM technologies such as Watsonx.ai, Watsonx. Assistant and Watsonx. Orchestate. The information is derived from courses in the IBM SkillsBuild. We are using granite models such as Granite 13 billion  Model Instruct for summarization and  generation of text for the learning materials.
+Climate change is amplifying risks across infrastructure, agriculture, and communities. Engineers and policymakers require data-driven tools to measure system resilience, model correlations of disasters, and automatically trigger actions when risk thresholds are exceeded. 
+Current workflows rely on  infrastructure design and moderate  statistical analysis, but these tools are often siloed and not linked to rule-based automation.
+
+The MeTTa programming language offers a novel way to unify heterogeneous data  from AutoCAD dimensions, Excel datasets and environmental hazard records  into logical, mathematical and semantic models that can power smart contracts and adaptive climate responses.
 
 ### The issue we are hoping to solve
-The problem  being addressed is people with medical conditions such as asthma are severely impacted by climate change specifically regarding elevated  temperature and high amounts of carbon emission. There are medications which have been designed to treat various conditions however, some medications do not work effectively due to hostile climatic conditions. 
-Additionally climate scientists, doctors or even pharmacists may not know how to use IBM  technology so as to assess environmental factors.
+Assessment of dimensions (AutoCAD)
+
+Problem: Engineers often manually calculate flow rates, pipe volumes, and plant capacities from drawings, which is slow and error-prone.
+
+MeTTa Solution: A programmatic way to take AutoCAD parameters (length, diameter, velocity) and automatically compute water flow, greenhouse insulation, and plant capacity for climate-resilient infrastructure.
+
+Mapping correlations of disasters
+
+Problem: Climate events (floods, droughts, earthquakes) are logged separately, without a unified system for identifying patterns and community risk.
+
+MeTTa solution: Assigns unique identifiers to each region and event, computes risk indices, and reveals disaster correlations to guide interventions (e.g., flood-prone regions get reinforced irrigation networks).
+
+Triggering Smart Contracts (Excel + MeTTa)
+
+Problem: Statistical thresholds from Excel (e.g., rainfall deviations > 2σ from mean) are not directly tied to financial or insurance responses.
+
+MeTTa Solution: Embeds these metrics into if-then rules, enabling automatic triggering of insurance payouts, disaster relief funds, or supply-chain adjustments via blockchain smart contracts.
+
 ### How our technology solution can help
 
 The solution could help by gathering real time data so as to aid reseachers such as; doctors and pharmacists to make appropriate decisions with regard to designing medical products, accurately analysing weather patterns, creation of code that relates to medical prescription and providing explanation to code.
@@ -36,67 +55,34 @@ Lastly, the application could be integrated to other softwares that climate scie
 
 ## Technology implementation
 
-## Judging criteria (https://compete.05hackathon.watsonx-challenge.ibm.com/competitions/may25#judging) 
-Feasibility:
-The solution is highly feasible given the maturity of the technologies used such as; Watsonx.ai, Elasticsearch, LangChain and  IBM Environmental Intelligence Suite. Each component is production-ready, well-documented, and widely supported.
+Step 1: AutoCAD integration
 
-Thought-out and planned:
-The project is clearly modularized into data ingestion (via IBM EIS APIs), embedding and indexing, and a RAG pipeline that integrates Elasticsearch and Watsonx.ai. The modular design ensures that each component can be developed, tested, and improved independently, making it robust and easy to extend.
+Export design attributes especially for farmers who are the most impacted by climatic disasters. The aspects being examined include pipe diameters, greenhouse cover thickness, plant footprint into structured data.
 
-Proof-of-concept:
-The proof-of-concept includes:
-Real IBM EIS data ingestion and storage.
-Embedding of documents using SentenceTransformers.
-Elasticsearch index creation and kNN search.
-A LangChain-based RAG pipeline integrating Watsonx.ai for answer generation.
-A Jupyter Notebook for interactive exploration.
+MeTTa computes real-time engineering metrics (flow rate, material insulation, plant capacity).
 
-Application of IBM technology:
-IBM Watsonx.ai is the foundation for generative AI, providing large language model capabilities. IBM EIS supplies authoritative climate data to ground the answers in factual insights. The IBM Cloud environment and Elasticsearch integrations are clearly defined, showing practical use of IBM’s ecosystem.
+Step 2: Excel integration
 
+Climate and economic datasets stored in Excel sheets (rainfall, yield, disaster costs).
 
-Creativity and innovation
-Unique and original approach:
-The project combines IBM’s EIS climate event data with Watsonx.ai to produce an innovative climate disaster Q&A tool that answers context-specific questions such as  flood risks using real, time-sensitive data.
+MeTTa queries Excel data for statistical analysis (mean rainfall, variance in crop yield).
 
-Differentiation in the market:
-Unlike standard generative AI chatbots, which is prone to  risk hallucinations, this solution uses a Retrieval-Augmented Generation (RAG) design that grounds answers in real-world climate data. This enhances trust, relevance, and reliability—key differentiators in the market.
+Step 3: Disaster correlation engine
 
-Novelty:
+Disaster events (flood, drought, earthquake) are logged with region, date, severity.
 
-Integration of IBM’s latest Foundation Models with LangChain’s RAG pipeline.
-ESG-focused design tailored to vulnerable communities and decision-makers.
-Embedding-driven semantic search using Elasticsearch—allowing precise, context-aware retrieval.
+MeTTa calculates risk indices per region and generates community IDs.
 
-Design and usability
-Design:
-The project is structured in clear, modular scripts and a user-friendly Jupyter Notebook, enabling quick adaptation by data scientists, climate analysts and policy teams.
+Step 4: Smart contract triggers
 
-User experience:
-Users simply enter a question; the system handles retrieval, embedding, and answer generation seamlessly. Outputs are displayed in a readable format, ready for direct use in decision-making.
+When thresholds are breached such as  MeTTa outputs conditions to a blockchain system.
 
-Ease of use:
-Installation is straightforward through requirements.txt and .env, and all credentials are handled securely. Users can interact with the system via notebook, CLI or integrate it into an existing chatbot or dashboard with minimal effort.
+Smart contracts auto-execute this includes release of microinsurance payouts, allocation of emergency water supply, or subsidy distribution
 
-Real-world adoption:
-Because it uses standard components such as Python, Elasticsearch, IBM APIs and common open-source frameworks SentenceTransformers, LangChain, it’s easy to integrate into real-world workflows.
+## Judging criteria 
+Relevance of MeTTa<img width="861" height="193" alt="image" src="https://github.com/user-attachments/assets/5f896b19-86e3-4d74-b8c3-3705725ad447" />
 
 
-Effectiveness and Efficiency
-Relevance:
-Addresses a high-priority issue: helping communities and policymakers quickly understand and respond to climate disasters (floods, heavy rain, earthquakes).
-
-Goal Achievement:
-Effectively retrieves relevant climate event data, combines it with generative AI, and provides context-rich, actionable answers tailored to user queries.
-
-Measurable Impact:
-By empowering faster, fact-based decisions, the solution helps reduce disaster response time and enhances community resilience both measurable through metrics like response times, risk assessments, and policy outcomes.
-
-Scalability:
-The design supports scaling:
-More event types such as  droughts and  wildfires can be added easily.
-The solution can serve multiple regions or integrate with national disaster management systems.
-Additional languages or local dialects can be integrated using Watsonx’s multilingual capabilities.
 
 ### IBM watsonx product(s) used
 
