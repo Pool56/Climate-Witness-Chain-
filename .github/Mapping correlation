@@ -1,0 +1,156 @@
+; ---------------------------
+; Disaster correlation KB (MeTTa)
+; ---------------------------
+
+; ---------------------------
+; Example event facts
+; Format: (event <event-id> <region> <type> <date-yyyymmdd> <severity-score>)
+; severity-score: numeric (1..10)
+; ---------------------------
+
+(event e1  R1 flood      20240115  7)
+(event e2  R1 flood      20240302  5)
+(event e3  R1 drought    20240612  4)
+(event e4  R1 earthquake 20240120  6)
+
+(event e5  R2 flood      20240501  2)
+(event e6  R2 drought    20240705  6)
+(event e7  R2 drought    20240911  7)
+(event e8  R2 earthquake 20241001  3)
+(event e9  R2 earthquake 20241015  5)
+
+(event e10 R3 flood      20240210  8)
+(event e11 R3 flood      20240225  9)
+(event e12 R3 flood      20240312  7)
+(event e13 R3 drought    20240820  2)
+(event e14 R3 earthquake 20240930  1)
+
+(event e15 R4 flood      20240405  1)
+(event e16 R4 drought    20240510  3)
+(event e17 R4 drought    20240630  2)
+(event e18 R4 earthquake 20240715  4)
+(event e19 R4 earthquake 20240801  4)
+
+; ---------------------------
+; Utility / arithmetic helpers (assumed available in your MeTTa runtime)
+; sum(list), len(list), div(a,b), sqrt(x), pow(x,2), concat(a,b,...)
+; map/filter/collect primitives also assumed (typical in algebraic MeTTa setups)
+; If your runtime uses different names, rename these.
+; ---------------------------
+
+; ---------------------------
+; 1) Per-region: collect severities by event type
+; (region_events <region> <type> <list-of-severities>)
+; ---------------------------
+
+(= (region_events $R $T)
+   (collect
+     (map (lambda ($evt) (nth $evt 4))      ; severity is field index 4 in (event ...)
+          (filter (lambda ($e) (and (= (nth $e 1) $R) (= (nth $e 2) $T)))
+                  (events_all)))))
+
+; helper: a builtin to get all event facts as a list
+(events_all) ; runtime should expand/list all (event ...) facts
+
+; ---------------------------
+; 2) count, avg severity, risk index per region/type
+; count = len(list)
+; avg = if count>0 then sum(list)/count else 0
+; risk_index = count * avg
+; ---------------------------
+
+(= (count_events $R $T)
+   (len (region_events $R $T)))
+
+(= (avg_severity $R $T)
+   (let (($slist (region_events $R $T))
+         ($n (len $slist)))
+     (if (> $n 0) (div (sum $slist) $n) 0)))
+
+(= (risk_index $R $T)
+   (* (count_events $R $T) (avg_severity $R $T)))
+
+; ---------------------------
+; 3) Unique identifier for community report
+;    Format returned: (community_id <region> <date> <severity> "<ID-string>")
+;    ID-string example: "R1_20240115_S7"  (Region_Date_S<roundedSeverity>)
+; ---------------------------
+
+(= (community_id $region $date $severity)
+   (let (($sev_round (round $severity 0)) ; round to integer
+         ($idstr (concat $region "_" (to-string $date) "_S" (to-string $sev_round))))
+     (id $region $date $severity $idstr)))
+
+; ---------------------------
+; 4) Per-region summary report (for a region R)
+;    returns a structured tuple/list with numeric fields
+; ---------------------------
+
+(= (region_summary $R)
+   (let (($fcount (count_events $R flood))
+         ($favg   (avg_severity $R flood))
+         ($frisk  (risk_index $R flood))
+
+         ($dcount (count_events $R drought))
+         ($davg   (avg_severity $R drought))
+         ($drisk  (risk_index $R drought))
+
+         ($ecount (count_events $R earthquake))
+         ($eavg   (avg_severity $R earthquake))
+         ($erisk  (risk_index $R earthquake)))
+
+     (summary
+       $R
+       (flood  (count $fcount) (avg $favg) (risk $frisk))
+       (drought(count $dcount) (avg $davg) (risk $drisk))
+       (quake (count $ecount) (avg $eavg) (risk $erisk)))))
+
+; ---------------------------
+; 5) Correlation (Pearson) between two event-type risk-index series across a set of regions
+;    Usage: (pearson_correlation regions-list typeA typeB)
+;    Implemented by:
+;      - build vectors XA = [risk_index(r,typeA) for r in regions]
+;      - XB = [...]
+;      - compute mean(XA), mean(XB)
+;      - covariance = sum((xa-meanA)*(xb-meanB))
+;      - denom = sqrt(sum((xa-meanA)^2) * sum((xb-meanB)^2))
+;      - correlation = covariance / denom  (0 if denom == 0)
+; ---------------------------
+
+(= (pearson_correlation $regions $A $B)
+   (let* ( ($XA  (map (lambda ($r) (risk_index $r $A)) $regions))
+           ($XB  (map (lambda ($r) (risk_index $r $B)) $regions))
+           ($n   (len $XA))
+           ($meanA (if (> $n 0) (div (sum $XA) $n) 0))
+           ($meanB (if (> $n 0) (div (sum $XB) $n) 0))
+           ($cov  (sum (map (lambda ($pair)
+                               (* (- (nth $pair 0) $meanA) (- (nth $pair 1) $meanB)))
+                            (zip $XA $XB))))
+           ($ssA  (sum (map (lambda ($x) (pow (- $x $meanA) 2)) $XA)))
+           ($ssB  (sum (map (lambda ($x) (pow (- $x $meanB) 2)) $XB)))
+           ($denom (sqrt (* $ssA $ssB))))
+     (if (> $denom 0) (div $cov $denom) 0)))
+
+; ---------------------------
+; 6) Example dataset - region list
+; ---------------------------
+
+(region_list (R1 R2 R3 R4))
+
+; ---------------------------
+; 7) Example Queries (usage patterns)
+; ---------------------------
+; - Get region summary for R1:
+;   (region_summary R1)
+;
+; - Generate a community ID for event e1 (R1, date 20240115, severity 7):
+;   (community_id R1 20240115 7)
+;
+; - Compute risk index of floods in R3:
+;   (risk_index R3 flood)
+;
+; - Compute Pearson correlation between flood and drought risk across regions:
+;   (pearson_correlation (R1 R2 R3 R4) flood drought)
+;
+; - Get all region summaries (map over region_list):
+;   (map region_summary (nth region_list 0)) ; adapt to your runtime's map/list handling
