@@ -1,0 +1,598 @@
+
+#!/usr/bin/env python3
+"""
+cad_agro_water_analyzer.py
+
+Analyze an AutoCAD DXF to extract:
+- Pipe metrics (diameter, optional wall thickness, lengths, volumes, weights)
+- Greenhouse cover area and material thickness
+- Plant spacing / canopy footprint and total occupied area
+
+Assumptions & supported encodings
+---------------------------------
+1) BLOCKs with attributes (recommended):
+   - PIPE blocks: ATTRIBS {DIAMETER_MM, THICKNESS_MM (optional), LENGTH_M (optional)}
+   - GREENHOUSE blocks/polylines: ATTRIBS {COVER_THICK_MM or COVER_THICK_MIC}
+   - PLANT blocks: ATTRIBS {CANOPY_DIAM_MM or SPACING_X_MM & SPACING_Y_MM}
+
+2) Layer naming conventions (fallbacks):
+   - Pipes on layers like: "PIPES", "PIPE_DN100", "WATER_PIPE_DN250_T6"
+        * DN*** parsed as bore diameter (mm)
+        * T* parsed as wall thickness (mm)
+   - Greenhouse cover layers like: "GREENHOUSE_COVER_T_200MIC" or "GREENHOUSE_COVER_T_0p2MM"
+   - Plant layers like: "PLANT_CANOPY_600MM" or "PLANT_SPACING_400x600MM"
+
+3) Geometry inference (last resort):
+   - Pipe centerlines: LINE/LWPOLYLINE on pipe-ish layers => length; diameter from nearby CIRCLE or line width if present.
+   - Greenhouse cover area: closed LWPOLYLINE/BOUNDARY on greenhouse-cover layers => area
+   - Plant footprint: CIRCLE (canopy) => area; or BLOCK count * (spacing rectangle) if attributes present.
+
+Units:
+- DXF drawing units are assumed to be **meters** unless overridden with --drawing-units.
+- Attribute values with suffixes are respected (MM/MIC/M).
+- Computed outputs are reported in SI (m, m², m³), diameter/thickness re-stated in mm.
+
+Usage:
+  python cad_agro_water_analyzer.py path/to/drawing.dxf \
+      --drawing-units m \
+      --density-kg-per-m3 7850 \
+      --config mapping.yaml \
+      --out-report report.csv
+
+The optional YAML config lets you tailor layer/block names and parsing hints.
+
+Author: (you)
+"""
+
+import re
+import math
+import csv
+import sys
+import argparse
+from dataclasses import dataclass, asdict
+from typing import Dict, List, Optional, Tuple, Iterable
+
+try:
+    import ezdxf
+    from ezdxf.entities import Insert, Circle, LWPolyline, Line, Polyline, MText, Text
+    from ezdxf.math import Vec3
+except ImportError as e:
+    print("Missing dependency: ezdxf. Install with `pip install ezdxf`.", file=sys.stderr)
+    raise
+
+try:
+    import yaml  # optional
+except Exception:
+    yaml = None
+
+
+# ----------------------------- Helpers  and data models -----------------------------
+
+@dataclass
+class PipeRecord:
+    source: str              # 'ATTRIB', 'LAYER', 'GEOM'
+    identifier: str          # block name, layer name, or entity handle
+    length_m: float
+    diameter_mm: Optional[float]  # outer or nominal
+    thickness_mm: Optional[float]
+    volume_m3: Optional[float]    # water volume if internal diameter known
+    steel_weight_kg: Optional[float]  # if thickness known and density provided
+
+
+@dataclass
+class GreenhouseCoverRecord:
+    source: str
+    identifier: str
+    area_m2: float
+    thickness_mm: Optional[float]
+
+
+@dataclass
+class PlantRecord:
+    source: str
+    identifier: str
+    per_plant_area_m2: float
+    count: int
+    total_area_m2: float
+
+
+@dataclass
+class Config:
+    pipe_layers_regex: str = r"(?i)\bpipe(s)?\b|(?i)\bwater_pipe\b"
+    gh_cover_layers_regex: str = r"(?i)\bgreenhouse(_)?cover\b|(?i)\bgh_cover\b"
+    plant_layers_regex: str = r"(?i)\bplant(s)?\b|(?i)\bcanopy\b"
+
+    pipe_block_names: List[str] = None
+    greenhouse_block_names: List[str] = None
+    plant_block_names: List[str] = None
+
+    # Attribute keys (case-insensitive match)
+    attr_diam_mm: List[str] = None
+    attr_thick_mm: List[str] = None
+    attr_len_m: List[str] = None
+
+    attr_cover_thick_mm: List[str] = None
+    attr_cover_thick_mic: List[str] = None
+
+    attr_canopy_diam_mm: List[str] = None
+    attr_spacing_x_mm: List[str] = None
+    attr_spacing_y_mm: List[str] = None
+
+    def __post_init__(self):
+        if self.pipe_block_names is None:
+            self.pipe_block_names = ["PIPE", "WATER_PIPE", "PIPE_RUN"]
+        if self.greenhouse_block_names is None:
+            self.greenhouse_block_names = ["GREENHOUSE", "GH", "GH_COVER"]
+        if self.plant_block_names is None:
+            self.plant_block_names = ["PLANT", "TREE", "CROP"]
+
+        if self.attr_diam_mm is None:
+            self.attr_diam_mm = ["DIAMETER_MM", "DN_MM", "OD_MM", "NOM_DIA_MM"]
+        if self.attr_thick_mm is None:
+            self.attr_thick_mm = ["THICKNESS_MM", "T_MM", "WALL_MM"]
+        if self.attr_len_m is None:
+            self.attr_len_m = ["LENGTH_M", "LEN_M"]
+
+        if self.attr_cover_thick_mm is None:
+            self.attr_cover_thick_mm = ["COVER_THICK_MM", "THICK_MM"]
+        if self.attr_cover_thick_mic is None:
+            self.attr_cover_thick_mic = ["COVER_THICK_MIC", "THICK_MIC"]
+
+        if self.attr_canopy_diam_mm is None:
+            self.attr_canopy_diam_mm = ["CANOPY_DIAM_MM", "CANOPY_MM", "CROWN_DIAM_MM"]
+        if self.attr_spacing_x_mm is None:
+            self.attr_spacing_x_mm = ["SPACING_X_MM", "SX_MM"]
+        if self.attr_spacing_y_mm is None:
+            self.attr_spacing_y_mm = ["SPACING_Y_MM", "SY_MM"]
+
+
+# ---- Unit parsing ----
+
+def parse_value_with_unit(s: str) -> Optional[float]:
+    """
+    Parse strings like '200', '200mm', '0.2m', '200mic', '200 µm', 'DN100', 'T6'
+    Return value in meters (for lengths) when possible.
+    - 'DN###' returns millimeters (as float), caller decides how to use.
+    """
+    if s is None:
+        return None
+    raw = s.strip().lower().replace("µ", "u")
+    # microns
+    m = re.match(r"^([0-9]*\.?[0-9]+)\s*(mic|um|micron|microns)$", raw)
+    if m:
+        v_um = float(m.group(1))
+        return v_um / 1_000_000.0  # meters
+
+    # mm
+    m = re.match(r"^([0-9]*\.?[0-9]+)\s*mm$", raw)
+    if m:
+        v_mm = float(m.group(1))
+        return v_mm / 1000.0
+
+    # meters
+    m = re.match(r"^([0-9]*\.?[0-9]+)\s*m$", raw)
+    if m:
+        return float(m.group(1))
+
+    # DN and T tokens -> return mm for caller
+    m = re.search(r"dn\s*([0-9]*\.?[0-9]+)", raw)
+    if m:
+        v_mm = float(m.group(1))
+        return v_mm / 1000.0
+
+    m = re.search(r"\bt\s*([0-9]*\.?[0-9]+)", raw)
+    if m:
+        v_mm = float(m.group(1))
+        return v_mm / 1000.0
+
+    # plain number -> assume drawing units (handled by caller)
+    m = re.match(r"^([0-9]*\.?[0-9]+)$", raw)
+    if m:
+        return float(m.group(1))
+
+    return None
+
+
+def to_mm(x_m: Optional[float]) -> Optional[float]:
+    if x_m is None:
+        return None
+    return x_m * 1000.0
+
+
+# ----------------------------- Geometry utilities -----------------------------
+
+def polyline_length_m(pl: LWPolyline | Polyline, du_scale: float) -> float:
+    if isinstance(pl, LWPolyline):
+        pts = [Vec3(*p[:2]) for p in pl.get_points()]  # ignore bulge for length approximation
+    else:
+        pts = [v.dxf.location for v in pl.vertices]
+    length = 0.0
+    for a, b in zip(pts, pts[1:]):
+        length += (b - a).magnitude
+    return length * du_scale
+
+
+def polyline_area_m2(pl: LWPolyline | Polyline, du_scale: float) -> float:
+    # Shoelace on XY, treating as planar and closed
+    if isinstance(pl, LWPolyline):
+        pts = [Vec3(*p[:2]) for p in pl.get_points()]
+    else:
+        pts = [v.dxf.location for v in pl.vertices]
+    if pts and pts[0] != pts[-1]:
+        pts.append(pts[0])
+    area2 = 0.0
+    for i in range(len(pts) - 1):
+        area2 += pts[i].x * pts[i+1].y - pts[i+1].x * pts[i].y
+    return abs(area2) * 0.5 * (du_scale ** 2)
+
+
+def entity_layer_matches(ent, pattern: re.Pattern) -> bool:
+    try:
+        layer = ent.dxf.layer or ""
+    except Exception:
+        layer = ""
+    return bool(pattern.search(layer))
+
+
+# ----------------------------- Extractors -----------------------------
+
+def get_insert_attributes(ins: Insert) -> Dict[str, str]:
+    out = {}
+    try:
+        for att in ins.attribs():  # type: ignore[attr-defined]
+            tag = str(att.dxf.tag).upper()
+            out[tag] = str(att.dxf.text)
+    except Exception:
+        pass
+    return out
+
+
+def first_match_attr(attrs: Dict[str, str], keys: List[str]) -> Optional[str]:
+    if not attrs:
+        return None
+    keys_upper = [k.upper() for k in keys]
+    for k, v in attrs.items():
+        if k.upper() in keys_upper:
+            return v
+    return None
+
+
+def parse_pipe_from_block(ins: Insert, cfg: Config, du_scale: float, density: Optional[float]) -> Optional[PipeRecord]:
+    name = ins.dxf.name.upper()
+    if name not in [n.upper() for n in cfg.pipe_block_names]:
+        return None
+    attrs = get_insert_attributes(ins)
+
+    # Length: attribute in meters OR fallback to block x-scale as length
+    length_m = None
+    v = first_match_attr(attrs, cfg.attr_len_m)
+    if v is not None:
+        length_m = parse_value_with_unit(v)
+    if length_m is None:
+        # Rough fallback: block x-scale (drawing units) -> meters
+        try:
+            length_m = ins.dxf.xscale * du_scale
+        except Exception:
+            length_m = 0.0
+
+    # Diameter (mm) as meters then convert to mm for reporting
+    diameter_m = None
+    v = first_match_attr(attrs, cfg.attr_diam_mm)
+    if v is not None:
+        parsed = parse_value_with_unit(v)
+        diameter_m = parsed if parsed is not None else None
+
+    # Thickness (mm) optional
+    thick_m = None
+    v = first_match_attr(attrs, cfg.attr_thick_mm)
+    if v is not None:
+        thick_m = parse_value_with_unit(v)
+
+    # Volumes & weight
+    volume_m3, steel_weight_kg = None, None
+    if diameter_m:
+        if thick_m and thick_m * 2.0 < diameter_m:
+            # Pipe material volume per length (annulus of OD and ID)
+            od = diameter_m
+            id_ = od - 2.0 * thick_m
+            shell_area = math.pi * (od**2 - id_**2) / 4.0
+            material_vol = shell_area * (length_m or 0.0)
+            if density:
+                steel_weight_kg = material_vol * density
+        # Water volume using internal diameter if thin-wall known
+        if thick_m and 2.0 * thick_m < diameter_m:
+            id_ = diameter_m - 2.0 * thick_m
+        else:
+            # If thickness not known, assume OD ~ DN; compute internal ≈ diameter
+            id_ = diameter_m
+        flow_area = math.pi * (id_**2) / 4.0
+        volume_m3 = flow_area * (length_m or 0.0)
+
+    return PipeRecord(
+        source="ATTRIB",
+        identifier=name,
+        length_m=length_m or 0.0,
+        diameter_mm=to_mm(diameter_m),
+        thickness_mm=to_mm(thick_m) if thick_m else None,
+        volume_m3=volume_m3,
+        steel_weight_kg=steel_weight_kg
+    )
+
+
+def parse_pipe_from_layer(ent, cfg: Config, du_scale: float, density: Optional[float]) -> Optional[PipeRecord]:
+    # Parse diameter/thickness from layer text like PIPE_DN100_T6
+    layer = (ent.dxf.layer or "").upper()
+    if not re.search(cfg.pipe_layers_regex, layer, flags=re.IGNORECASE):
+        return None
+
+    dn_m = None
+    thick_m = None
+
+    m = re.search(r"DN\s*([0-9]+(?:\.[0-9]+)?)", layer)
+    if m:
+        dn_m = float(m.group(1)) / 1000.0
+    m = re.search(r"\bT\s*([0-9]+(?:\.[0-9]+)?)", layer)
+    if m:
+        thick_m = float(m.group(1)) / 1000.0
+
+    # Length from geometry if LINE/LWPOLYLINE
+    length_m = 0.0
+    try:
+        if isinstance(ent, Line):
+            a, b = ent.dxf.start, ent.dxf.end
+            length_m = Vec3(a).distance(Vec3(b)) * du_scale
+        elif isinstance(ent, (LWPolyline, Polyline)):
+            length_m = polyline_length_m(ent, du_scale)
+        else:
+            return None
+    except Exception:
+        return None
+
+    volume_m3, steel_weight_kg = None, None
+    if dn_m:
+        id_ = dn_m if not thick_m or 2*thick_m >= dn_m else (dn_m - 2*thick_m)
+        flow_area = math.pi * (id_**2) / 4.0
+        volume_m3 = flow_area * length_m
+        if thick_m and density and 2*thick_m < dn_m:
+            shell_area = math.pi * (dn_m**2 - (dn_m - 2*thick_m)**2) / 4.0
+            material_vol = shell_area * length_m
+            steel_weight_kg = material_vol * density
+
+    return PipeRecord(
+        source="LAYER",
+        identifier=layer,
+        length_m=length_m,
+        diameter_mm=to_mm(dn_m),
+        thickness_mm=to_mm(thick_m) if thick_m else None,
+        volume_m3=volume_m3,
+        steel_weight_kg=steel_weight_kg
+    )
+
+
+def parse_greenhouse_cover(ent, cfg: Config, du_scale: float) -> Optional[GreenhouseCoverRecord]:
+    layer = (ent.dxf.layer or "")
+    if not re.search(cfg.gh_cover_layers_regex, layer, flags=re.IGNORECASE):
+        return None
+
+    thickness_m = None
+    uplayer = layer.upper()
+    # Parse thickness from layer, e.g. T_200MIC or T_0P2MM
+    m = re.search(r"T[_\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*(MIC|UM)\b", uplayer)
+    if m:
+        thickness_m = float(m.group(1)) / 1_000_000.0
+    else:
+        m = re.search(r"T[_\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*MM\b", uplayer)
+        if m:
+            thickness_m = float(m.group(1)) / 1000.0
+
+    area_m2 = None
+    if isinstance(ent, (LWPolyline, Polyline)) and getattr(ent.dxf, "flags", 0) & 1 or isinstance(ent, (LWPolyline, Polyline)) and ent.closed:
+        # closed
+        area_m2 = polyline_area_m2(ent, du_scale)
+    elif isinstance(ent, Circle):
+        r = ent.dxf.radius * du_scale
+        area_m2 = math.pi * r * r
+    else:
+        # Skip unclosed shapes for cover
+        return None
+
+    return GreenhouseCoverRecord(
+        source="LAYER",
+        identifier=layer,
+        area_m2=area_m2,
+        thickness_mm=to_mm(thickness_m) if thickness_m else None
+    )
+
+
+def parse_plant(ent, cfg: Config, du_scale: float) -> Optional[PlantRecord]:
+    layer = (ent.dxf.layer or "")
+    if not re.search(cfg.plant_layers_regex, layer, flags=re.IGNORECASE):
+        return None
+
+    # If canopy circle:
+    if isinstance(ent, Circle):
+        r = ent.dxf.radius * du_scale
+        area = math.pi * r * r
+        return PlantRecord(source="GEOM", identifier=layer, per_plant_area_m2=area, count=1, total_area_m2=area)
+
+    # If block with attributes for spacing or canopy
+    if isinstance(ent, Insert):
+        attrs = get_insert_attributes(ent)
+        def get_first(keys): return first_match_attr(attrs, keys)
+
+        canopy = get_first(cfg.attr_canopy_diam_mm)
+        sx = get_first(cfg.attr_spacing_x_mm)
+        sy = get_first(cfg.attr_spacing_y_mm)
+
+        if canopy:
+            d_m = parse_value_with_unit(str(canopy))
+            if d_m:
+                area = math.pi * (d_m/2)**2
+                return PlantRecord(source="ATTRIB", identifier=ent.dxf.name, per_plant_area_m2=area, count=1, total_area_m2=area)
+        if sx and sy:
+            sx_m = parse_value_with_unit(str(sx))
+            sy_m = parse_value_with_unit(str(sy))
+            if sx_m and sy_m:
+                area = sx_m * sy_m
+                return PlantRecord(source="ATTRIB", identifier=ent.dxf.name, per_plant_area_m2=area, count=1, total_area_m2=area)
+
+    # Closed polyline as footprint (rare but supported)
+    if isinstance(ent, (LWPolyline, Polyline)) and (getattr(ent.dxf, "flags", 0) & 1 or getattr(ent, "closed", False)):
+        area = polyline_area_m2(ent, du_scale)
+        return PlantRecord(source="GEOM", identifier=layer, per_plant_area_m2=area, count=1, total_area_m2=area)
+
+    return None
+
+
+# ----------------------------- Orchestrator -----------------------------
+
+def analyze_dxf(path: str, drawing_units: str, density: Optional[float], cfg: Optional[Config]) -> Tuple[List[PipeRecord], List[GreenhouseCoverRecord], List[PlantRecord]]:
+    doc = ezdxf.readfile(path)
+    msp = doc.modelspace()
+
+    # Unit scale factor: from drawing units to meters
+    du_scale = {"m": 1.0, "mm": 0.001, "cm": 0.01, "ft": 0.3048, "in": 0.0254}.get(drawing_units.lower(), 1.0)
+
+    pipes: List[PipeRecord] = []
+    covers: List[GreenhouseCoverRecord] = []
+    plants: List[PlantRecord] = []
+
+    pipe_layer_rx = re.compile(cfg.pipe_layers_regex, re.IGNORECASE)
+    gh_layer_rx = re.compile(cfg.gh_cover_layers_regex, re.IGNORECASE)
+    plant_layer_rx = re.compile(cfg.plant_layers_regex, re.IGNORECASE)
+
+    # First pass: INSERT blocks with attributes
+    for ins in msp.query("INSERT"):
+        # pipes from block
+        pr = parse_pipe_from_block(ins, cfg, du_scale, density)
+        if pr:
+            pipes.append(pr)
+        # plants from block
+        plr = parse_plant(ins, cfg, du_scale)
+        if plr:
+            plants.append(plr)
+        # greenhouse cover thickness from blocks (area still from geometry)
+        if ins.dxf.name.upper() in [n.upper() for n in cfg.greenhouse_block_names]:
+            attrs = get_insert_attributes(ins)
+            tmm = first_match_attr(attrs, cfg.attr_cover_thick_mm)
+            tmic = first_match_attr(attrs, cfg.attr_cover_thick_mic)
+            thickness_m = None
+            if tmm:
+                thickness_m = parse_value_with_unit(tmm)
+            elif tmic:
+                thickness_m = parse_value_with_unit(tmic)
+            if thickness_m:
+                covers.append(GreenhouseCoverRecord(source="ATTRIB", identifier=ins.dxf.name, area_m2=0.0, thickness_mm=to_mm(thickness_m)))
+
+    # Second pass: Lines & polylines & circles on layers
+    for ent in msp:
+        try:
+            if isinstance(ent, (Line, LWPolyline, Polyline)):
+                pr = parse_pipe_from_layer(ent, cfg, du_scale, density)
+                if pr:
+                    pipes.append(pr)
+            if isinstance(ent, (LWPolyline, Polyline, Circle)):
+                gh = parse_greenhouse_cover(ent, cfg, du_scale)
+                if gh:
+                    covers.append(gh)
+            if isinstance(ent, (Circle, LWPolyline, Polyline)):
+                if entity_layer_matches(ent, plant_layer_rx):
+                    plr = parse_plant(ent, cfg, du_scale)
+                    if plr:
+                        plants.append(plr)
+        except Exception:
+            # Continue on robustly
+            continue
+
+    return pipes, covers, plants
+
+
+def aggregate_and_write(pipes: List[PipeRecord], covers: List[GreenhouseCoverRecord], plants: List[PlantRecord], out_csv: Optional[str]):
+    # Aggregations
+    total_pipe_length = sum(p.length_m for p in pipes)
+    total_water_vol = sum(p.volume_m3 or 0.0 for p in pipes)
+    total_steel_weight = sum(p.steel_weight_kg or 0.0 for p in pipes)
+
+    total_cover_area = 0.0
+    cover_thick_values_mm = []
+    for c in covers:
+        total_cover_area += c.area_m2
+        if c.thickness_mm:
+            cover_thick_values_mm.append(c.thickness_mm)
+    avg_cover_thickness_mm = (sum(cover_thick_values_mm) / len(cover_thick_values_mm)) if cover_thick_values_mm else None
+
+    total_plants = len(plants)
+    total_plant_area = sum(p.total_area_m2 for p in plants)
+    avg_per_plant_area = (total_plant_area / total_plants) if total_plants else 0.0
+
+    # Write CSV report if requested
+    if out_csv:
+        with open(out_csv, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["SECTION", "SOURCE", "IDENTIFIER", "LENGTH_M", "DIAMETER_MM", "THICKNESS_MM", "WATER_VOLUME_M3", "STEEL_WEIGHT_KG", "COVER_AREA_M2", "COVER_THICK_MM", "PLANT_PER_AREA_M2", "PLANT_COUNT", "PLANT_TOTAL_AREA_M2"])
+            for p in pipes:
+                w.writerow(["PIPES", p.source, p.identifier, f"{p.length_m:.6f}", fmt_opt(p.diameter_mm), fmt_opt(p.thickness_mm), fmt_opt(p.volume_m3), fmt_opt(p.steel_weight_kg), "", "", "", "", ""])
+            for c in covers:
+                w.writerow(["GREENHOUSE_COVER", c.source, c.identifier, "", "", "", "", "", f"{c.area_m2:.6f}", fmt_opt(c.thickness_mm), "", "", ""])
+            for pl in plants:
+                w.writerow(["PLANTS", pl.source, pl.identifier, "", "", "", "", "", "", "", f"{pl.per_plant_area_m2:.6f}", f"{pl.count}", f"{pl.total_area_m2:.6f}"])
+
+            # Summary
+            w.writerow([])
+            w.writerow(["SUMMARY"])
+            w.writerow(["Total pipe length (m)", f"{total_pipe_length:.6f}"])
+            w.writerow(["Total water volume in pipes (m^3)", fmt_opt(total_water_vol)])
+            w.writerow(["Total pipe steel weight (kg)", fmt_opt(total_steel_weight)])
+            w.writerow(["Total greenhouse cover area (m^2)", f"{total_cover_area:.6f}"])
+            w.writerow(["Average cover thickness (mm)", fmt_opt(avg_cover_thickness_mm)])
+            w.writerow(["Plant instances counted", f"{total_plants}"])
+            w.writerow(["Total plant occupied area (m^2)", f"{total_plant_area:.6f}"])
+            w.writerow(["Average per-plant area (m^2)", f"{avg_per_plant_area:.6f}"])
+
+    # Print concise summary to console
+    print("\n=== SUMMARY ===")
+    print(f"Total pipe length: {total_pipe_length:.3f} m")
+    print(f"Water volume in pipes: {fmt_opt(total_water_vol)} m^3")
+    print(f"Estimated pipe material weight: {fmt_opt(total_steel_weight)} kg")
+    print(f"Greenhouse cover area: {total_cover_area:.3f} m^2 (avg thickness: {fmt_opt(avg_cover_thickness_mm)} mm)")
+    print(f"Plants: {total_plants} counted | Total area: {total_plant_area:.3f} m^2 | Avg per-plant: {avg_per_plant_area:.3f} m^2")
+
+
+def fmt_opt(x: Optional[float]) -> str:
+    return "" if x is None else f"{x:.6f}"
+
+
+# ----------------------------- CLI -----------------------------
+
+def load_config(path: Optional[str]) -> Config:
+    base = Config()
+    if path is None:
+        return base
+    if yaml is None:
+        print("pyyaml not installed; ignoring --config.", file=sys.stderr)
+        return base
+    with open(path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+    # Merge keys if present
+    for k, v in data.items():
+        if hasattr(base, k):
+            setattr(base, k, v)
+    return base
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Analyze DXF for pipes, greenhouse cover, and plant spacing/footprint.")
+    ap.add_argument("dxf", help="Path to .dxf file")
+    ap.add_argument("--drawing-units", default="m", help="Units used in the drawing space: m|mm|cm|ft|in (default: m)")
+    ap.add_argument("--density-kg-per-m3", type=float, default=None, help="Material density for pipe (e.g., steel 7850). Enables weight calculation.")
+    ap.add_argument("--config", default=None, help="YAML config to override block/layer patterns & attribute tags")
+    ap.add_argument("--out-report", default=None, help="CSV file to write detailed report")
+    args = ap.parse_args()
+
+    cfg = load_config(args.config)
+    pipes, covers, plants = analyze_dxf(args.dxf, args.drawing_units, args.density_kg_per_m3, cfg)
+    aggregate_and_write(pipes, covers, plants, args.out_report)
+
+
+if __name__ == "__main__":
+    main()
