@@ -17,10 +17,15 @@
 
 
 ## Project summary
-Climate change is amplifying risks across infrastructure, agriculture, and communities. Engineers and policymakers require data-driven tools to measure system resilience, model correlations of disasters, and automatically trigger actions when risk thresholds are exceeded. 
-Current workflows rely on  infrastructure design and moderate  statistical analysis, but these tools are often siloed and not linked to rule-based automation.
+Climate change is intensifying risks to infrastructure, agriculture, and vulnerable communities. Engineers, researchers, insurers and policymakers increasingly require integrated, data-driven systems that can assess resilience, model correlated climate hazards and trigger timely, accountable responses when risk thresholds are exceeded.
+
+Current approaches rely on siloed tools: AutoCAD for design, Excel for statistical analysis, standalone climate databases for hazard records and manual decision-making for interventions. These workflows are slow, error-prone, and poorly suited to dynamic climate risk.
+
+This project proposes a MeTTa-based Climate Resilience Platform that unifies heterogeneous data into a digital twin–driven, rule-based decision system, augmented—but not replaced—by large language models (LLMs). The platform enables explainable engineering calculations, climate risk reasoning, and automated yet governable responses such as insurance payouts, disaster relief activation, and adaptive infrastructure design.
 
 MeTTa is used as a bridging language to interact with OpenAI's models through a framework called MeTTa-Motto
+OpenAI models are used as constrained interpretive and synthesis components within a MeTTa-governed climate resilience platform. They provide explanation, summarization, and code assistance under explicit logical and functional boundaries, while all safety-critical reasoning, thresholds, and automated actions remain governed by formal MeTTa rules and human oversight.
+OpenAI’s models play a supporting, bounded, and explainable role within the system. They are not used as primary decision-makers, but as intelligent components invoked through MeTTa-Motto under strict logical and functional constraints.
 MeTTa-Motto allows developers to use OpenAI's GPT-4 or other LLMs as "components" within a MeTTa script
 It enables the calling of functions and the generation of JSON responses from OpenAI models that adhere to specific signatures defined in MeTTa.
 
@@ -49,13 +54,28 @@ MeTTa Solution: Embeds these metrics into if-then rules, enabling automatic trig
 ### How our technology solution can help
 
 The solution could help by gathering real time data so as to aid reseachers such as geologists, agriculturalists and water engineers to make appropriate decisions with regard to designing agricultural equipment, formaulating farming practices,  accurately analysing weather patterns, creation of code that relates to medical prescription and providing explanation to code.
-This link can be used by African communities to upload photos or videos. Additionally, technical experts can use the data obtained from African communities to derive insights and eventually send reports to disaster management firms and insurance companies
+The technology helps farmers in mitigating effects of climate change that affects crops, the goal is to conduct an assessment of where farmers do farming then in the event of extreme climate conditions such as drought or flooding data is collected which provides action on what remedial steps to be taken. The assessment is done through farmers taking pictures and other relevant information is collected which is analysed using software such as AutoCAD and other analytical software from IBM. Codes are also generated where they are needed by use of MeTTa programing language, all the outputs are finally sent to Open AI to conduct analysis.  Reviews are also taken from farmers based on how 
+Afterwards, all the information is collected and stored as a refernce for future analysis.
+
+As a short demo, this link can be used by African communities to upload photos or videos. Additionally, technical experts can use the data obtained from African communities to derive insights and eventually send reports to disaster management firms and insurance companies
 https://climate-witness-repo-nneg.bolt.host/
 
 ### Our idea
 The idea is creation of a dataset comprised of images mostly from local farmers and other detailed information such as Excel sheets and documents from agricultural experts.
 This data will be useful to train Open AI models through use of programming language such as MeTTa or even python as well as use of software such as AutoCAD and even other analytical software from IBM and many others.
-The data obtained especially images are analysed in detail by assessment of feature such as dimension, color, geographical location and other factors with the goal of deriving as much insights as possible
+The data obtained especially images are analysed in detail by assessment of feature such as dimension, color, geographical location and other factors with the goal of deriving as much insights as possible.
+
+The central innovation is the use of the MeTTa programming language as a formal semantic and logical layer that:
+
+Integrates geometric, statistical, and environmental data
+
+Encodes deterministic engineering laws and probabilistic risk models
+
+Governs when and how LLMs, through  MeTTa-Motto, are invoked
+
+Produces auditable, explainable outputs suitable for high-stakes decisions
+
+Through MeTTa-Motto, OpenAI models are used as constrained components for interpretation, explanation, and synthesis—never as opaque decision-makers.
 
 ## Technology implementation
 
