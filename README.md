@@ -20,7 +20,12 @@
 Climate change is amplifying risks across infrastructure, agriculture, and communities. Engineers and policymakers require data-driven tools to measure system resilience, model correlations of disasters, and automatically trigger actions when risk thresholds are exceeded. 
 Current workflows rely on  infrastructure design and moderate  statistical analysis, but these tools are often siloed and not linked to rule-based automation.
 
+MeTTa is used as a bridging language to interact with OpenAI's models through a framework called MeTTa-Motto
+MeTTa-Motto allows developers to use OpenAI's GPT-4 or other LLMs as "components" within a MeTTa script
+It enables the calling of functions and the generation of JSON responses from OpenAI models that adhere to specific signatures defined in MeTTa.
+
 The MeTTa programming language offers a novel way to unify heterogeneous data  from AutoCAD dimensions, Excel datasets and environmental hazard records  into logical, mathematical and semantic models that can power smart contracts and adaptive climate responses.
+
 
 ### The issue we are hoping to solve
 Assessment of dimensions (AutoCAD)
@@ -43,15 +48,14 @@ MeTTa Solution: Embeds these metrics into if-then rules, enabling automatic trig
 
 ### How our technology solution can help
 
-The solution could help by gathering real time data so as to aid reseachers such as; doctors and pharmacists to make appropriate decisions with regard to designing medical products, accurately analysing weather patterns, creation of code that relates to medical prescription and providing explanation to code.
+The solution could help by gathering real time data so as to aid reseachers such as geologists, agriculturalists and water engineers to make appropriate decisions with regard to designing agricultural equipment, formaulating farming practices,  accurately analysing weather patterns, creation of code that relates to medical prescription and providing explanation to code.
 This link can be used by African communities to upload photos or videos. Additionally, technical experts can use the data obtained from African communities to derive insights and eventually send reports to disaster management firms and insurance companies
 https://climate-witness-repo-nneg.bolt.host/
 
 ### Our idea
-The idea is creation of an Intelligent  assistant that is able to answer queries with regard to health sciences and climatic patterns.
-The future prospects are to have the application placed on hospitals for monitoring status of patients with respiratory conditions.
-Test the application performance on pharmaceutical firms so that they could assess the performance of the medications while taking into account environmental factors.
-Lastly, the application could be integrated to other softwares that climate scientists have  such as water engineers with regard to prediction of water shortage.
+The idea is creation of a dataset comprised of images mostly from local farmers and other detailed information such as Excel sheets and documents from agricultural experts.
+This data will be useful to train Open AI models through use of programming language such as MeTTa or even python as well as use of software such as AutoCAD and even other analytical software from IBM and many others.
+The data obtained especially images are analysed in detail by assessment of feature such as dimension, color, geographical location and other factors with the goal of deriving as much insights as possible
 
 ## Technology implementation
 
